@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistencia Célula</title>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='24' fill='%232e7d32'/%3E%3Ctext x='90' y='112' font-size='90' text-anchor='middle' fill='white'%3E%E2%9C%94%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+<main class="app">
+  <div class="topbar">
+    <h1>ASISTENCIA CÉLULA</h1>
+    <div id="usuarioSuperior" class="usuario-superior oculto"></div>
+  </div>
+
+  <section id="vistaLogin" class="panel login-panel">
+    <h2>Ingreso al sistema</h2>
+    <p class="login-ayuda">Admin por defecto: <strong>admin</strong> / <strong>admin123</strong></p>
+    <form id="formLogin" class="login-form">
+      <label for="loginUsuario">Usuario</label>
+      <input id="loginUsuario" type="text" required>
+      <label for="loginClave">Contraseña</label>
+      <input id="loginClave" type="password" required>
+      <button type="submit" class="btn btn-principal">Ingresar</button>
+    </form>
+    <p id="loginError" class="login-error oculto">Usuario o contraseña inválidos.</p>
+  </section>
+
+  <section id="vistaInicio" class="panel-inicio oculto">
+    <nav class="sidebar">
+      <div class="sidebar-titulo">Menú</div>
+      <button id="btnNavDashboard" class="btn-nav activo">&#128202; Dashboard</button>
+      <button id="btnNavReportes" class="btn-nav">&#128196; Reportes</button>
+      <button id="btnNavIntegrantes" class="btn-nav">&#128100; Registrar Integrantes</button>
+      <button id="btnNavFechas" class="btn-nav">&#128197; Fechas de asistencia</button>
+      <button id="btnNavAsistencia" class="btn-nav btn-nav-ir">&#10004; Registro de Asistencia</button>
+      <button id="btnNavAdmin" class="btn-nav oculto">&#9881; Administración</button>
+      <div class="sidebar-pie">
+        <div id="textoSesion" class="texto-sesion"></div>
+        <button id="btnCerrarSesion" class="btn-nav">Cerrar sesión</button>
+        <button id="btnLimpiarTodo" class="btn-nav btn-nav-limpiar">&#128465; Limpiar datos actuales</button>
+      </div>
+    </nav>
+
+    <div class="contenido-inicio">
+      <div id="seccionDashboard" class="subseccion">
+        <h3>Dashboard</h3>
+        <div class="filtros-dashboard">
+          <div class="campo-filtro">
+            <label for="filtroCelulaDashboard">Célula</label>
+            <select id="filtroCelulaDashboard"></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroLiderDashboard">Líder</label>
+            <select id="filtroLiderDashboard"></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroFechaDashboard">Fecha</label>
+            <input id="filtroFechaDashboard" type="date">
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroMesDashboard">Mes</label>
+            <select id="filtroMesDashboard"></select>
+          </div>
+        </div>
+        <div id="dashResumen" class="dash-resumen"></div>
+        <h4 class="dash-subtitulo">Detalle por reunión</h4>
+        <div id="dashTarjetas" class="dash-tarjetas"></div>
+      </div>
+
+      <div id="seccionReportes" class="subseccion oculto">
+        <h3>Reportes</h3>
+        <div class="filtros-dashboard">
+          <div class="campo-filtro">
+            <label for="filtroCelulaReporte">Célula</label>
+            <select id="filtroCelulaReporte"></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroLiderReporte">Líder</label>
+            <select id="filtroLiderReporte"></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroMesReporte">Mes</label>
+            <select id="filtroMesReporte"></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroFechaReporte">Fecha</label>
+            <input id="filtroFechaReporte" type="date">
+          </div>
+        </div>
+        <p id="resumenFiltrosReporte" class="texto-celula-actual"></p>
+        <div class="fila-formulario">
+          <button id="btnExportarPdfReporte" type="button" class="btn btn-principal">Exportar reporte PDF</button>
+        </div>
+        <div id="previewReporte" class="panel-admin"></div>
+      </div>
+
+      <div id="seccionIntegrantes" class="subseccion oculto">
+        <h3>Registrar nuevo integrante</h3>
+        <p id="integranteCelulaActual" class="texto-celula-actual"></p>
+        <form id="formIntegrante" class="form-integrante">
+          <input id="editandoId" type="hidden" value="">
+          <div class="form-integrante-grid">
+            <div class="campo">
+              <label for="nombreIntegrante">Nombre completo</label>
+              <input id="nombreIntegrante" type="text" placeholder="Nombre del integrante" required>
+            </div>
+            <div class="campo">
+              <label for="tipoIntegrante">Tipo</label>
+              <select id="tipoIntegrante" required>
+                <option value="Pleno">Pleno</option>
+                <option value="Participante">Participante</option>
+                <option value="Oyente">Oyente</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="nacimientoIntegrante">Fecha de nacimiento</label>
+              <input id="nacimientoIntegrante" type="date">
+            </div>
+            <div class="campo">
+              <label for="celularIntegrante">Celular</label>
+              <input id="celularIntegrante" type="tel" placeholder="Número de celular">
+            </div>
+          </div>
+          <div class="form-integrante-acciones">
+            <button type="submit" id="btnGuardarIntegrante" class="btn btn-principal">Agregar integrante</button>
+            <button type="button" id="btnCancelarEdicion" class="btn btn-gris oculto">Cancelar</button>
+          </div>
+        </form>
+        <div class="container tabla-integrantes-wrap">
+          <table class="tabla-integrantes">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>F. Nacimiento</th>
+                <th>Edad</th>
+                <th>Celular</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="bodyIntegrantes"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="seccionFechas" class="subseccion oculto">
+        <h3>Fechas de asistencia</h3>
+        <p id="fechaCelulaActual" class="texto-celula-actual"></p>
+        <form id="formFecha" class="fila-formulario">
+          <label class="oculto-label" for="fechaAsistencia">Fecha de asistencia</label>
+          <input id="fechaAsistencia" type="date" required>
+          <label class="oculto-label" for="leccionFecha">Lección</label>
+          <input id="leccionFecha" type="text" placeholder="Lección dictada">
+          <label class="oculto-label" for="ofrendaFecha">Ofrenda recibida</label>
+          <input id="ofrendaFecha" type="number" min="0" step="0.01" placeholder="Ofrenda S/">
+          <button type="submit" class="btn btn-principal">Agregar fecha</button>
+        </form>
+        <ul id="listaFechas" class="lista"></ul>
+      </div>
+
+      <div id="seccionAdmin" class="subseccion oculto">
+        <h3>Administración</h3>
+        <div class="admin-grid">
+          <div class="panel-admin">
+            <h4>Células</h4>
+            <form id="formCelula" class="fila-formulario">
+              <input id="nombreCelula" type="text" placeholder="Nombre de célula" required>
+              <button type="submit" class="btn btn-principal">Crear célula</button>
+            </form>
+            <ul id="listaCelulas" class="lista"></ul>
+          </div>
+
+          <div class="panel-admin">
+            <h4>Usuarios</h4>
+            <form id="formUsuario" class="form-usuario">
+              <input id="nombreUsuario" type="text" placeholder="Nombre" required>
+              <input id="loginUsuarioNuevo" type="text" placeholder="Usuario" required>
+              <input id="claveUsuarioNuevo" type="password" placeholder="Contraseña" required>
+              <label class="oculto-label" for="rolUsuarioNuevo">Rol del usuario</label>
+              <select id="rolUsuarioNuevo" required>
+                <option value="lider">Líder</option>
+                <option value="admin">Admin</option>
+              </select>
+              <label class="oculto-label" for="celulaUsuarioNuevo">Célula asignada</label>
+              <select id="celulaUsuarioNuevo"></select>
+              <button type="submit" class="btn btn-principal">Crear usuario</button>
+            </form>
+            <table class="tabla-integrantes">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Célula</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="bodyUsuarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vistaAsistencia" class="panel oculto">
+    <div class="encabezado-asistencia">
+      <h2>Registro de asistencia</h2>
+      <div class="filtro-mes">
+        <label for="mesAsistencia">Mes:</label>
+        <select id="mesAsistencia"></select>
+      </div>
+      <div class="acciones-asistencia">
+        <button id="btnExportarCsv" class="btn btn-principal">Exportar CSV</button>
+        <button id="btnExportarResumenCsv" class="btn btn-principal">Exportar resumen CSV</button>
+        <button id="btnVolverInicio" class="btn">Regresar a la página principal</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <table id="tabla">
+        <thead id="headTabla">
+          <tr>
+            <th>N°</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="bodyTabla"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
