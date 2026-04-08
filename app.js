@@ -1037,6 +1037,8 @@ function exportarReportePdf() {
         th, td { border: 2px solid #222; padding: 4px 6px; text-align: center; font-size: 12px; }
         th { background: #efe3ba; color: #111; }
         td:nth-child(2) { text-align: left; }
+        .detalle-table th, .detalle-table td { border: 1px solid #ccc; text-align: left; padding: 8px; }
+        .detalle-table th { background: #2e7d32; color: #fff; }
         .miembro-col { width: 38px; font-weight: 700; }
         .asistencia-celda { width: 48px; font-weight: 700; }
         .asistencia-ok { color: #0f6b1f; }
@@ -1047,6 +1049,25 @@ function exportarReportePdf() {
     <body>
       <h2>ASISTENCIA MES DE: ${etiquetaMes.toUpperCase()}</h2>
       <p class="meta"><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"} | <strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()} | <strong>Versión:</strong> ${APP_VERSION}</p>
+
+      <h3>Detalle por reunión</h3>
+      ${fechasFiltradas.length
+        ? `<table class="detalle-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Célula</th>
+            <th>Lección</th>
+            <th>Asistencias</th>
+            <th>Faltas</th>
+            <th>Ofrenda</th>
+          </tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>`
+        : "<p>No hay reuniones para los filtros seleccionados.</p>"}
+
+      <h3>Planilla mensual de integrantes</h3>
       <table>
         <thead>
           <tr>
