@@ -807,6 +807,41 @@ function obtenerDatosFiltradosReporte() {
   return { miembrosFiltrados, fechasFiltradas };
 }
 
+function obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas) {
+  return miembrosFiltrados
+    .map((m) => {
+      const fechasIntegrante = fechasFiltradas.filter((f) => f.celulaId === m.celulaId);
+      let asistio = 0;
+      let falto = 0;
+      let sinRegistro = 0;
+
+      fechasIntegrante.forEach((f) => {
+        const estado = asistencias[keyAsistencia(m.celulaId, m.id, f.fecha)];
+        if (estado === true) asistio += 1;
+        else if (estado === false) falto += 1;
+        else sinRegistro += 1;
+      });
+
+      const totalReuniones = fechasIntegrante.length;
+      const porcentaje = totalReuniones > 0 ? (asistio / totalReuniones) * 100 : 0;
+
+      return {
+        integrante: m,
+        totalReuniones,
+        asistio,
+        falto,
+        sinRegistro,
+        porcentaje
+      };
+    })
+    .sort((a, b) => {
+      const celA = obtenerNombreCelula(a.integrante.celulaId);
+      const celB = obtenerNombreCelula(b.integrante.celulaId);
+      if (celA !== celB) return celA.localeCompare(celB);
+      return a.integrante.nombre.localeCompare(b.integrante.nombre);
+    });
+}
+
 function renderReporte() {
   if (!resumenFiltrosReporte || !previewReporte) {
     return;
@@ -835,6 +870,24 @@ function renderReporte() {
   });
 
   const totalOfrenda = fechasFiltradas.reduce((sum, f) => sum + Number(f.ofrenda || 0), 0);
+  const resumenIntegrantes = obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas);
+
+  const filasIntegrantes = resumenIntegrantes.length
+    ? resumenIntegrantes
+      .map((r, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${r.integrante.nombre}</td>
+          <td>${obtenerNombreCelula(r.integrante.celulaId)}</td>
+          <td>${r.totalReuniones}</td>
+          <td>${r.asistio}</td>
+          <td>${r.falto}</td>
+          <td>${r.sinRegistro}</td>
+          <td>${r.porcentaje.toFixed(1)}%</td>
+        </tr>
+      `)
+      .join("")
+    : "<tr><td colspan='8'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
 
   previewReporte.innerHTML = `
     <h4>Vista previa del reporte</h4>
@@ -844,6 +897,22 @@ function renderReporte() {
       <li>Faltas registradas: <strong>${totalFaltas}</strong></li>
       <li>Ofrenda total: <strong>S/ ${totalOfrenda.toFixed(2)}</strong></li>
     </ul>
+    <h4>Asistencia por integrante</h4>
+    <table class="tabla-integrantes">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Integrante</th>
+          <th>Célula</th>
+          <th>Reuniones</th>
+          <th>Asistió</th>
+          <th>Faltó</th>
+          <th>Sin registro</th>
+          <th>% Asistencia</th>
+        </tr>
+      </thead>
+      <tbody>${filasIntegrantes}</tbody>
+    </table>
   `;
 }
 
@@ -879,6 +948,24 @@ function exportarReportePdf() {
     `;
   });
 
+  const resumenIntegrantes = obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas);
+  const filasIntegrantesPdf = resumenIntegrantes.length
+    ? resumenIntegrantes
+      .map((r, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${r.integrante.nombre}</td>
+          <td>${obtenerNombreCelula(r.integrante.celulaId)}</td>
+          <td>${r.totalReuniones}</td>
+          <td>${r.asistio}</td>
+          <td>${r.falto}</td>
+          <td>${r.sinRegistro}</td>
+          <td>${r.porcentaje.toFixed(1)}%</td>
+        </tr>
+      `)
+      .join("")
+    : "<tr><td colspan='8'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
+
   const html = `
     <html>
     <head>
@@ -886,6 +973,7 @@ function exportarReportePdf() {
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h2 { color: #2e7d32; margin-bottom: 6px; }
+        h3 { color: #2e7d32; margin: 18px 0 6px; }
         p { color: #444; margin-top: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; }
@@ -896,6 +984,7 @@ function exportarReportePdf() {
       <h2>Reporte de Asistencia - Células</h2>
       <p><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"}</p>
       <p><strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()}</p>
+      <h3>Detalle por reunión</h3>
       <table>
         <thead>
           <tr>
@@ -908,6 +997,23 @@ function exportarReportePdf() {
           </tr>
         </thead>
         <tbody>${filas}</tbody>
+      </table>
+
+      <h3>Asistencia por integrante</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Integrante</th>
+            <th>Célula</th>
+            <th>Reuniones</th>
+            <th>Asistió</th>
+            <th>Faltó</th>
+            <th>Sin registro</th>
+            <th>% Asistencia</th>
+          </tr>
+        </thead>
+        <tbody>${filasIntegrantesPdf}</tbody>
       </table>
       <script>window.onload = () => window.print();</script>
     </body>
