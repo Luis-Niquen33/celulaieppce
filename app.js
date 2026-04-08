@@ -972,23 +972,55 @@ function exportarReportePdf() {
     `;
   });
 
-  const filasIntegrantesPdf = resumenIntegrantes.length
-    ? resumenIntegrantes
-      .map((r, index) => `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${r.integrante.nombre}</td>
-          <td>${obtenerNombreCelula(r.integrante.celulaId)}</td>
-          <td>${r.totalReuniones}</td>
-          <td>${r.asistio}</td>
-          <td>${r.falto}</td>
-          <td>${r.sinRegistro}</td>
-          <td>${r.porcentaje.toFixed(1)}%</td>
-          <td>${r.detalleTexto}</td>
-        </tr>
-      `)
+  const fechasUnicas = [...new Set(fechasFiltradas.map((f) => f.fecha))]
+    .sort((a, b) => a.localeCompare(b));
+
+  let etiquetaMes = "Sin mes";
+  if (filtroMesReporte.value) {
+    etiquetaMes = formatearMes(filtroMesReporte.value);
+  } else if (fechasUnicas[0]) {
+    etiquetaMes = formatearMes(fechasUnicas[0].slice(0, 7));
+  }
+
+  const cabeceraFechas = fechasUnicas.length
+    ? fechasUnicas.map((fecha) => `<th>${formatearFecha(fecha)}</th>`).join("")
+    : "<th>Sin fechas</th>";
+
+  const filasPlanilla = miembrosFiltrados.length
+    ? miembrosFiltrados
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .map((m, index) => {
+        const tipo = (m.tipo || "").toLowerCase();
+        const esPleno = tipo === "pleno" ? "X" : "";
+        const esParticipante = tipo === "participante" ? "X" : "";
+        const esOyente = tipo === "oyente" ? "X" : "";
+
+        const celdasAsistencia = fechasUnicas.length
+          ? fechasUnicas.map((fecha) => {
+            const registroFecha = fechasFiltradas.find((f) => f.fecha === fecha && f.celulaId === m.celulaId);
+            if (!registroFecha) return "<td class='asistencia-celda'>—</td>";
+            const estado = asistencias[keyAsistencia(m.celulaId, m.id, fecha)];
+            if (estado === true) return "<td class='asistencia-celda asistencia-ok'>✓</td>";
+            if (estado === false) return "<td class='asistencia-celda asistencia-no'>F</td>";
+            return "<td class='asistencia-celda'>—</td>";
+          }).join("")
+          : "<td>—</td>";
+
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${m.nombre}</td>
+            <td>${m.nacimiento ? formatearFecha(m.nacimiento) : ""}</td>
+            <td>${m.celular || ""}</td>
+            <td class='miembro-col'>${esPleno}</td>
+            <td class='miembro-col'>${esParticipante}</td>
+            <td class='miembro-col'>${esOyente}</td>
+            ${celdasAsistencia}
+          </tr>
+        `;
+      })
       .join("")
-    : "<tr><td colspan='9'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
+    : `<tr><td colspan='${7 + Math.max(fechasUnicas.length, 1)}'>No hay integrantes para mostrar con los filtros actuales.</td></tr>`;
 
   const html = `
     <html>
@@ -996,51 +1028,41 @@ function exportarReportePdf() {
       <title>Reporte Asistencia</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { color: #2e7d32; margin-bottom: 6px; }
+        h2 { color: #d90429; margin-bottom: 6px; text-align: center; font-size: 38px; letter-spacing: 1px; }
         h3 { color: #2e7d32; margin: 18px 0 6px; }
         p { color: #444; margin-top: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; }
-        th { background: #2e7d32; color: #fff; }
+        th, td { border: 2px solid #222; padding: 4px 6px; text-align: center; font-size: 12px; }
+        th { background: #efe3ba; color: #111; }
+        td:nth-child(2) { text-align: left; }
+        .miembro-col { width: 38px; font-weight: 700; }
+        .asistencia-celda { width: 48px; font-weight: 700; }
+        .asistencia-ok { color: #0f6b1f; }
+        .asistencia-no { color: #b71c1c; }
+        .meta { margin-bottom: 10px; }
       </style>
     </head>
     <body>
-      <h2>Reporte de Asistencia - Células</h2>
-      <p><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"}</p>
-      <p><strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()}</p>
-      <h3>Detalle por reunión</h3>
-      ${fechasFiltradas.length
-        ? `<table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Célula</th>
-            <th>Lección</th>
-            <th>Asistencias</th>
-            <th>Faltas</th>
-            <th>Ofrenda</th>
-          </tr>
-        </thead>
-        <tbody>${filas}</tbody>
-      </table>`
-        : "<p>No hay reuniones para los filtros seleccionados.</p>"}
-
-      <h3>Asistencia por integrante</h3>
+      <h2>ASISTENCIA MES DE: ${etiquetaMes.toUpperCase()}</h2>
+      <p class="meta"><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"} | <strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()}</p>
       <table>
         <thead>
           <tr>
-            <th>N°</th>
-            <th>Integrante</th>
-            <th>Célula</th>
-            <th>Reuniones</th>
-            <th>Asistió</th>
-            <th>Faltó</th>
-            <th>Sin registro</th>
-            <th>% Asistencia</th>
-            <th>Detalle de asistencias</th>
+            <th rowspan="2">N°</th>
+            <th rowspan="2">Apellidos y Nombres</th>
+            <th rowspan="2">Fecha de Nacimiento</th>
+            <th rowspan="2">Celular</th>
+            <th colspan="3">MIEMBRO</th>
+            <th colspan="${Math.max(fechasUnicas.length, 1)}">ASISTENCIA A CULTOS EN HOGARES</th>
+          </tr>
+          <tr>
+            <th>PLENO</th>
+            <th>PARTICIPANTE</th>
+            <th>OYENTE</th>
+            ${cabeceraFechas}
           </tr>
         </thead>
-        <tbody>${filasIntegrantesPdf}</tbody>
+        <tbody>${filasPlanilla}</tbody>
       </table>
       <script>window.onload = () => window.print();</script>
     </body>
