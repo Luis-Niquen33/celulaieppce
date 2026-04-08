@@ -28,8 +28,53 @@ const defaultMiembros = [
   { id: 4, celulaId: "cel-1", nombre: "Marisabel Davila", tipo: "Pleno", nacimiento: "", celular: "" }
 ];
 
+const DB_PATH = "asistenciaCelula";
+
+let firebaseApp = null;
+let firebaseDb = null;
+let firebaseInicializado = false;
+let cargandoDesdeNube = false;
+let guardadoNubePendiente = Promise.resolve();
+
+function firebaseDisponible() {
+  return !!(globalThis.firebase && globalThis.FIREBASE_CONFIG?.databaseURL);
+}
+
+function inicializarFirebase() {
+  if (firebaseInicializado) return !!firebaseDb;
+  firebaseInicializado = true;
+
+  if (!firebaseDisponible()) {
+    return false;
+  }
+
+  try {
+    firebaseApp = globalThis.firebase.apps?.length
+      ? globalThis.firebase.app()
+      : globalThis.firebase.initializeApp(globalThis.FIREBASE_CONFIG);
+    firebaseDb = globalThis.firebase.database(firebaseApp);
+    return true;
+  } catch (error) {
+    console.error("No se pudo inicializar Firebase:", error);
+    firebaseDb = null;
+    return false;
+  }
+}
+
 function loadJson(key, fallback) {
   return JSON.parse(localStorage.getItem(key)) || fallback;
+}
+
+function normalizarEstado(data) {
+  if (!data || typeof data !== "object") return null;
+  return {
+    celulas: Array.isArray(data.celulas) && data.celulas.length ? data.celulas : defaultCelulas,
+    users: Array.isArray(data.users) && data.users.length ? data.users : defaultUsers,
+    miembros: Array.isArray(data.miembros) ? data.miembros : defaultMiembros,
+    fechas: Array.isArray(data.fechas) ? data.fechas : [],
+    asistencias: data.asistencias && typeof data.asistencias === "object" ? data.asistencias : {},
+    sesion: data.sesion ?? null
+  };
 }
 
 let celulas = loadJson("celulas", defaultCelulas);
@@ -73,8 +118,6 @@ function migrarAsistenciasAntiguas() {
   });
   asistencias = nuevo;
 }
-
-migrarAsistenciasAntiguas();
 
 const vistaLogin = document.getElementById("vistaLogin");
 const vistaInicio = document.getElementById("vistaInicio");
@@ -153,6 +196,52 @@ function guardarDatos() {
   localStorage.setItem("fechas", JSON.stringify(fechas));
   localStorage.setItem("asistencias", JSON.stringify(asistencias));
   localStorage.setItem("sesion", JSON.stringify(sesion));
+
+  if (!firebaseDb || cargandoDesdeNube) return;
+
+  const payload = { celulas, users, miembros, fechas, asistencias, sesion };
+  guardadoNubePendiente = guardadoNubePendiente
+    .catch(() => undefined)
+    .then(() => firebaseDb.ref(DB_PATH).set(payload))
+    .catch((error) => {
+      console.error("No se pudo guardar en Firebase:", error);
+    });
+}
+
+async function cargarDatosDesdeNube() {
+  if (!inicializarFirebase() || !firebaseDb) return;
+
+  try {
+    cargandoDesdeNube = true;
+    const snapshot = await firebaseDb.ref(DB_PATH).once("value");
+    const data = snapshot.val();
+
+    if (!data) {
+      guardarDatos();
+      return;
+    }
+
+    const estado = normalizarEstado(data);
+    if (!estado) return;
+
+    celulas = estado.celulas;
+    users = estado.users;
+    miembros = estado.miembros;
+    fechas = estado.fechas;
+    asistencias = estado.asistencias;
+    sesion = estado.sesion;
+
+    localStorage.setItem("celulas", JSON.stringify(celulas));
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("miembros", JSON.stringify(miembros));
+    localStorage.setItem("fechas", JSON.stringify(fechas));
+    localStorage.setItem("asistencias", JSON.stringify(asistencias));
+    localStorage.setItem("sesion", JSON.stringify(sesion));
+  } catch (error) {
+    console.error("No se pudo cargar desde Firebase:", error);
+  } finally {
+    cargandoDesdeNube = false;
+  }
 }
 
 function esAdmin() {
@@ -1163,13 +1252,23 @@ function cancelarEdicionIntegrante() {
 }
 
 function inicializarSesion() {
-  if (!sesion) {
-    mostrarLogin();
-    return;
-  }
+  cargarDatosDesdeNube()
+    .finally(() => {
+      migrarAsistenciasAntiguas();
+      guardarDatos();
 
-  refrescarTodo();
-  mostrarInicio();
+      if (!sesion) {
+        mostrarLogin();
+        return;
+      }
+
+      refrescarTodo();
+      mostrarInicio();
+    })
+    .catch((error) => {
+      console.error("Error al iniciar sesión:", error);
+      mostrarLogin();
+    });
 }
 
 formLogin.addEventListener("submit", (e) => {
