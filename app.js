@@ -814,16 +814,34 @@ function obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltrada
       let asistio = 0;
       let falto = 0;
       let sinRegistro = 0;
+      const detalleAsistencias = [];
 
       fechasIntegrante.forEach((f) => {
         const estado = asistencias[keyAsistencia(m.celulaId, m.id, f.fecha)];
-        if (estado === true) asistio += 1;
-        else if (estado === false) falto += 1;
-        else sinRegistro += 1;
+        if (estado === true) {
+          asistio += 1;
+          detalleAsistencias.push({ fecha: f.fecha, estadoTexto: "Asistió" });
+        } else if (estado === false) {
+          falto += 1;
+          detalleAsistencias.push({ fecha: f.fecha, estadoTexto: "Faltó" });
+        } else {
+          sinRegistro += 1;
+          detalleAsistencias.push({ fecha: f.fecha, estadoTexto: "Sin registro" });
+        }
       });
 
       const totalReuniones = fechasIntegrante.length;
       const porcentaje = totalReuniones > 0 ? (asistio / totalReuniones) * 100 : 0;
+      const detalleHtml = detalleAsistencias.length
+        ? detalleAsistencias
+          .map((d) => `${formatearFecha(d.fecha)}: ${d.estadoTexto}`)
+          .join("<br>")
+        : "Sin reuniones";
+      const detalleTexto = detalleAsistencias.length
+        ? detalleAsistencias
+          .map((d) => `${formatearFecha(d.fecha)}: ${d.estadoTexto}`)
+          .join(" | ")
+        : "Sin reuniones";
 
       return {
         integrante: m,
@@ -831,7 +849,9 @@ function obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltrada
         asistio,
         falto,
         sinRegistro,
-        porcentaje
+        porcentaje,
+        detalleHtml,
+        detalleTexto
       };
     })
     .sort((a, b) => {
@@ -884,10 +904,11 @@ function renderReporte() {
           <td>${r.falto}</td>
           <td>${r.sinRegistro}</td>
           <td>${r.porcentaje.toFixed(1)}%</td>
+          <td>${r.detalleHtml}</td>
         </tr>
       `)
       .join("")
-    : "<tr><td colspan='8'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
+    : "<tr><td colspan='9'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
 
   previewReporte.innerHTML = `
     <h4>Vista previa del reporte</h4>
@@ -909,6 +930,7 @@ function renderReporte() {
           <th>Faltó</th>
           <th>Sin registro</th>
           <th>% Asistencia</th>
+          <th>Detalle de asistencias</th>
         </tr>
       </thead>
       <tbody>${filasIntegrantes}</tbody>
@@ -961,10 +983,11 @@ function exportarReportePdf() {
           <td>${r.falto}</td>
           <td>${r.sinRegistro}</td>
           <td>${r.porcentaje.toFixed(1)}%</td>
+          <td>${r.detalleTexto}</td>
         </tr>
       `)
       .join("")
-    : "<tr><td colspan='8'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
+    : "<tr><td colspan='9'>No hay integrantes para mostrar con los filtros actuales.</td></tr>";
 
   const html = `
     <html>
@@ -1011,6 +1034,7 @@ function exportarReportePdf() {
             <th>Faltó</th>
             <th>Sin registro</th>
             <th>% Asistencia</th>
+            <th>Detalle de asistencias</th>
           </tr>
         </thead>
         <tbody>${filasIntegrantesPdf}</tbody>
