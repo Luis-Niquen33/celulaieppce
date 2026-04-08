@@ -872,11 +872,6 @@ function renderReporte() {
 
   resumenFiltrosReporte.textContent = `Filtros activos: ${obtenerEtiquetaFiltrosReporte()}`;
 
-  if (fechasFiltradas.length === 0) {
-    previewReporte.innerHTML = "<p class='dash-vacio'>No hay datos para generar reporte con los filtros actuales.</p>";
-    return;
-  }
-
   let totalAsistencias = 0;
   let totalFaltas = 0;
 
@@ -891,6 +886,9 @@ function renderReporte() {
 
   const totalOfrenda = fechasFiltradas.reduce((sum, f) => sum + Number(f.ofrenda || 0), 0);
   const resumenIntegrantes = obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas);
+  const mensajeSinDatos = (fechasFiltradas.length === 0 && resumenIntegrantes.length === 0)
+    ? "<p class='dash-vacio'>No hay datos para generar reporte con los filtros actuales.</p>"
+    : "";
 
   const filasIntegrantes = resumenIntegrantes.length
     ? resumenIntegrantes
@@ -912,6 +910,7 @@ function renderReporte() {
 
   previewReporte.innerHTML = `
     <h4>Vista previa del reporte</h4>
+    ${mensajeSinDatos}
     <ul>
       <li>Reuniones incluidas: <strong>${fechasFiltradas.length}</strong></li>
       <li>Asistencias registradas: <strong>${totalAsistencias}</strong></li>
@@ -919,29 +918,32 @@ function renderReporte() {
       <li>Ofrenda total: <strong>S/ ${totalOfrenda.toFixed(2)}</strong></li>
     </ul>
     <h4>Asistencia por integrante</h4>
-    <table class="tabla-integrantes">
-      <thead>
-        <tr>
-          <th>N°</th>
-          <th>Integrante</th>
-          <th>Célula</th>
-          <th>Reuniones</th>
-          <th>Asistió</th>
-          <th>Faltó</th>
-          <th>Sin registro</th>
-          <th>% Asistencia</th>
-          <th>Detalle de asistencias</th>
-        </tr>
-      </thead>
-      <tbody>${filasIntegrantes}</tbody>
-    </table>
+    <div class="tabla-integrantes-wrap">
+      <table class="tabla-integrantes">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Integrante</th>
+            <th>Célula</th>
+            <th>Reuniones</th>
+            <th>Asistió</th>
+            <th>Faltó</th>
+            <th>Sin registro</th>
+            <th>% Asistencia</th>
+            <th>Detalle de asistencias</th>
+          </tr>
+        </thead>
+        <tbody>${filasIntegrantes}</tbody>
+      </table>
+    </div>
   `;
 }
 
 function exportarReportePdf() {
   const { miembrosFiltrados, fechasFiltradas } = obtenerDatosFiltradosReporte();
+  const resumenIntegrantes = obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas);
 
-  if (fechasFiltradas.length === 0) {
+  if (fechasFiltradas.length === 0 && resumenIntegrantes.length === 0) {
     alert("No hay datos para exportar con los filtros actuales.");
     return;
   }
@@ -970,7 +972,6 @@ function exportarReportePdf() {
     `;
   });
 
-  const resumenIntegrantes = obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas);
   const filasIntegrantesPdf = resumenIntegrantes.length
     ? resumenIntegrantes
       .map((r, index) => `
@@ -1008,7 +1009,8 @@ function exportarReportePdf() {
       <p><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"}</p>
       <p><strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()}</p>
       <h3>Detalle por reunión</h3>
-      <table>
+      ${fechasFiltradas.length
+        ? `<table>
         <thead>
           <tr>
             <th>Fecha</th>
@@ -1020,7 +1022,8 @@ function exportarReportePdf() {
           </tr>
         </thead>
         <tbody>${filas}</tbody>
-      </table>
+      </table>`
+        : "<p>No hay reuniones para los filtros seleccionados.</p>"}
 
       <h3>Asistencia por integrante</h3>
       <table>
