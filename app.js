@@ -28,6 +28,8 @@ const defaultMiembros = [
   { id: 4, celulaId: "cel-1", nombre: "Marisabel Davila", tipo: "Pleno", nacimiento: "", celular: "" }
 ];
 
+const APP_VERSION = "20260408-2";
+
 const DB_PATH = "asistenciaCelula";
 
 let firebaseApp = null;
@@ -1044,7 +1046,7 @@ function exportarReportePdf() {
     </head>
     <body>
       <h2>ASISTENCIA MES DE: ${etiquetaMes.toUpperCase()}</h2>
-      <p class="meta"><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"} | <strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()}</p>
+      <p class="meta"><strong>Generado por:</strong> ${sesion?.nombre || "Sistema"} | <strong>Filtros:</strong> ${obtenerEtiquetaFiltrosReporte()} | <strong>Versión:</strong> ${APP_VERSION}</p>
       <table>
         <thead>
           <tr>
