@@ -189,6 +189,9 @@ const loginUsuarioNuevo = document.getElementById("loginUsuarioNuevo");
 const claveUsuarioNuevo = document.getElementById("claveUsuarioNuevo");
 const rolUsuarioNuevo = document.getElementById("rolUsuarioNuevo");
 const celulaUsuarioNuevo = document.getElementById("celulaUsuarioNuevo");
+const editandoUsuarioId = document.getElementById("editandoUsuarioId");
+const btnGuardarUsuario = document.getElementById("btnGuardarUsuario");
+const btnCancelarUsuario = document.getElementById("btnCancelarUsuario");
 const bodyUsuarios = document.getElementById("bodyUsuarios");
 
 function guardarDatos() {
@@ -1283,17 +1286,46 @@ function renderAdmin() {
   users.forEach((u) => {
     const fila = document.createElement("tr");
     const celNombre = u.rol === "admin" ? "Todas" : obtenerNombreCelula(u.celulaId);
-    const accion = u.id === sesion.id ? "—" : `<button class='btn btn-eliminar' data-user-id='${u.id}'>Eliminar</button>`;
+    const acciones = `
+      <div class="integrante-acciones">
+        <button class='btn btn-editar' data-user-id='${u.id}' data-user-action='editar'>Editar</button>
+        ${u.id === sesion.id ? "" : `<button class='btn btn-eliminar' data-user-id='${u.id}' data-user-action='eliminar'>Eliminar</button>`}
+      </div>
+    `;
 
     fila.innerHTML = `
       <td>${u.nombre}</td>
       <td>${u.username}</td>
       <td>${u.rol}</td>
       <td>${celNombre}</td>
-      <td>${accion}</td>
+      <td>${acciones}</td>
     `;
     bodyUsuarios.appendChild(fila);
   });
+}
+
+function cancelarEdicionUsuario() {
+  if (editandoUsuarioId) editandoUsuarioId.value = "";
+  if (formUsuario) formUsuario.reset();
+  if (btnGuardarUsuario) btnGuardarUsuario.textContent = "Crear usuario";
+  if (btnCancelarUsuario) btnCancelarUsuario.classList.add("oculto");
+  if (rolUsuarioNuevo) rolUsuarioNuevo.value = "lider";
+  if (celulaUsuarioNuevo) celulaUsuarioNuevo.disabled = false;
+}
+
+function modoEditarUsuario(userId) {
+  const usuario = users.find((u) => u.id === userId);
+  if (!usuario) return;
+
+  editandoUsuarioId.value = usuario.id;
+  nombreUsuario.value = usuario.nombre;
+  loginUsuarioNuevo.value = usuario.username;
+  claveUsuarioNuevo.value = usuario.password;
+  rolUsuarioNuevo.value = usuario.rol;
+  celulaUsuarioNuevo.value = usuario.celulaId || celulas[0]?.id || "";
+  celulaUsuarioNuevo.disabled = usuario.rol === "admin";
+  btnGuardarUsuario.textContent = "Guardar cambios";
+  btnCancelarUsuario.classList.remove("oculto");
 }
 
 function refrescarTodo() {
@@ -1766,8 +1798,16 @@ formUsuario.addEventListener("submit", (e) => {
   e.preventDefault();
   if (!esAdmin()) return;
 
+  const nombre = nombreUsuario.value.trim();
   const username = loginUsuarioNuevo.value.trim();
-  if (users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
+  const editId = editandoUsuarioId.value;
+
+  if (!nombre || !username || !claveUsuarioNuevo.value) {
+    alert("Completa nombre, usuario y contraseña.");
+    return;
+  }
+
+  if (users.some((u) => u.id !== editId && u.username.toLowerCase() === username.toLowerCase())) {
     alert("El usuario ya existe.");
     return;
   }
@@ -1779,28 +1819,71 @@ formUsuario.addEventListener("submit", (e) => {
     return;
   }
 
-  users.push({
-    id: `u-${Date.now()}`,
-    nombre: nombreUsuario.value.trim(),
-    username,
-    password: claveUsuarioNuevo.value,
-    rol,
-    celulaId
-  });
+  if (editId) {
+    const idx = users.findIndex((u) => u.id === editId);
+    if (idx === -1) return;
+
+    users[idx] = {
+      ...users[idx],
+      nombre,
+      username,
+      password: claveUsuarioNuevo.value,
+      rol,
+      celulaId
+    };
+
+    if (sesion?.id === editId) {
+      sesion = {
+        ...sesion,
+        nombre,
+        rol,
+        celulaId
+      };
+    }
+  } else {
+    users.push({
+      id: `u-${Date.now()}`,
+      nombre,
+      username,
+      password: claveUsuarioNuevo.value,
+      rol,
+      celulaId
+    });
+  }
 
   guardarDatos();
-  formUsuario.reset();
-  celulaUsuarioNuevo.disabled = false;
+  cancelarEdicionUsuario();
   refrescarTodo();
 });
 
+btnCancelarUsuario.addEventListener("click", cancelarEdicionUsuario);
+
 bodyUsuarios.addEventListener("click", (e) => {
-  const userId = e.target.dataset.userId;
-  if (!userId || !esAdmin()) return;
+  if (!esAdmin()) return;
+
+  const btn = e.target.closest("button[data-user-id]");
+  if (!btn) return;
+  const userId = btn.dataset.userId;
+  const accion = btn.dataset.userAction;
+  if (!userId || !accion) return;
+
+  if (accion === "editar") {
+    modoEditarUsuario(userId);
+    return;
+  }
+
+  if (accion !== "eliminar") return;
+  if (userId === sesion?.id) {
+    alert("No puedes eliminar tu propio usuario en sesión.");
+    return;
+  }
 
   users = users.filter((u) => u.id !== userId);
+  if (editandoUsuarioId.value === userId) {
+    cancelarEdicionUsuario();
+  }
   guardarDatos();
-  renderAdmin();
+  refrescarTodo();
 });
 
 inicializarSesion();

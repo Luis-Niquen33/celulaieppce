@@ -177,6 +177,7 @@
           <div class="panel-admin">
             <h4>Usuarios</h4>
             <form id="formUsuario" class="form-usuario">
+              <input id="editandoUsuarioId" type="hidden" value="">
               <input id="nombreUsuario" type="text" placeholder="Nombre" required>
               <input id="loginUsuarioNuevo" type="text" placeholder="Usuario" required>
               <input id="claveUsuarioNuevo" type="password" placeholder="Contraseña" required>
@@ -187,20 +188,23 @@
               </select>
               <label class="oculto-label" for="celulaUsuarioNuevo">Célula asignada</label>
               <select id="celulaUsuarioNuevo"></select>
-              <button type="submit" class="btn btn-principal">Crear usuario</button>
+              <button id="btnGuardarUsuario" type="submit" class="btn btn-principal">Crear usuario</button>
+              <button id="btnCancelarUsuario" type="button" class="btn btn-gris oculto">Cancelar</button>
             </form>
-            <table class="tabla-integrantes">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Usuario</th>
-                  <th>Rol</th>
-                  <th>Célula</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody id="bodyUsuarios"></tbody>
-            </table>
+            <div class="tabla-scroll">
+              <table class="tabla-integrantes">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Célula</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="bodyUsuarios"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -239,7 +243,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js?v=20260408-2"></script>
-<script src="app.js?v=20260408-2"></script>
+<script src="firebase-config.js?v=20260410-1"></script>
+<script src="app.js?v=20260410-1"></script>
 </body>
 </html>

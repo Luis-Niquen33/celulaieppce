@@ -116,6 +116,12 @@ h1 {
   box-shadow: var(--shadow-md);
 }
 
+.panel-inicio,
+.contenido-inicio,
+.admin-grid > * {
+  min-width: 0;
+}
+
 .sidebar {
   width: 220px;
   min-width: 180px;
@@ -470,6 +476,14 @@ h1 {
   margin-bottom: 12px;
 }
 
+.form-usuario input,
+.form-usuario select,
+.panel-admin .fila-formulario input,
+.panel-admin .fila-formulario select {
+  min-width: 0;
+  width: 100%;
+}
+
 @media (max-width: 900px) {
   .form-usuario {
     grid-template-columns: 1fr;
@@ -478,6 +492,21 @@ h1 {
 
 .form-usuario .btn {
   grid-column: 1 / -1;
+}
+
+.tabla-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#seccionAdmin .tabla-integrantes {
+  table-layout: fixed;
+  min-width: 560px;
+}
+
+#seccionAdmin .tabla-integrantes td:last-child,
+#seccionAdmin .tabla-integrantes th:last-child {
+  width: 190px;
 }
 
 .form-usuario input,
