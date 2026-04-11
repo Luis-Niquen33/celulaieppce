@@ -1302,6 +1302,59 @@ function renderAdmin() {
     `;
     bodyUsuarios.appendChild(fila);
   });
+
+  renderMiembrosPorCelula();
+}
+
+function renderMiembrosPorCelula() {
+  const listaMiembros = document.getElementById("listaMiembrosCelulas");
+  if (!listaMiembros) return;
+
+  listaMiembros.innerHTML = "";
+
+  celulas.forEach((celula) => {
+    const miembrosCelula = miembros.filter((m) => m.celulaId === celula.id);
+    
+    const contenedorCelula = document.createElement("div");
+    contenedorCelula.className = "celula-miembros-contenedor";
+    
+    const tituloCelula = document.createElement("h5");
+    tituloCelula.className = "titulo-celula-miembros";
+    tituloCelula.textContent = `${celula.nombre} (${miembrosCelula.length} miembro/s)`;
+    contenedorCelula.appendChild(tituloCelula);
+    
+    const tabla = document.createElement("table");
+    tabla.className = "tabla-miembros-admin";
+    
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr>
+        <th>N°</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>F. Nacimiento</th>
+        <th>Celular</th>
+      </tr>
+    `;
+    tabla.appendChild(thead);
+    
+    const tbody = document.createElement("tbody");
+    miembrosCelula.forEach((miembro, index) => {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${miembro.nombre}</td>
+        <td><span class="badge-tipo">${miembro.tipo}</span></td>
+        <td>${miembro.nacimiento || "-"}</td>
+        <td>${miembro.celular || "-"}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+    tabla.appendChild(tbody);
+    
+    contenedorCelula.appendChild(tabla);
+    listaMiembros.appendChild(contenedorCelula);
+  });
 }
 
 function cancelarEdicionUsuario() {
