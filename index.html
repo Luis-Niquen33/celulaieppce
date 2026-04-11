@@ -34,10 +34,10 @@
       <button id="btnNavDashboard" class="btn-nav activo">&#128202; Dashboard</button>
       <button id="btnNavReportes" class="btn-nav">&#128196; Reportes</button>
       <button id="btnNavIntegrantes" class="btn-nav">&#128100; Registrar Integrantes</button>
-      <button id="btnNavMiembros" class="btn-nav">👥 Miembros de Células</button>
       <button id="btnNavFechas" class="btn-nav">&#128197; Fechas de asistencia</button>
       <button id="btnNavAsistencia" class="btn-nav btn-nav-ir">&#10004; Registro de Asistencia</button>
       <button id="btnNavAdmin" class="btn-nav oculto">&#9881; Administración</button>
+      <button id="btnNavMiembros" class="btn-nav oculto">👥 Miembros de Células</button>
       <div class="sidebar-pie">
         <div id="textoSesion" class="texto-sesion"></div>
         <button id="btnCerrarSesion" class="btn-nav">Cerrar sesión</button>
@@ -152,17 +152,12 @@
         <h3>Miembros de Células</h3>
         <div class="filtros-dashboard">
           <div class="campo-filtro">
-            <label for="filtroMiembrosCelula">Célula</label>
-            <select id="filtroMiembrosCelula"></select>
+            <label for="filtroMiembrosLider">Líder</label>
+            <select id="filtroMiembrosLider"></select>
           </div>
           <div class="campo-filtro">
-            <label for="filtroMiembrosTipo">Tipo</label>
-            <select id="filtroMiembrosTipo">
-              <option value="">Todos</option>
-              <option value="Pleno">Pleno</option>
-              <option value="Participante">Participante</option>
-              <option value="Oyente">Oyente</option>
-            </select>
+            <label for="filtroMiembrosCelula">Célula</label>
+            <select id="filtroMiembrosCelula"></select>
           </div>
         </div>
         <div class="container tabla-integrantes-wrap">

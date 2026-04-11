@@ -168,7 +168,7 @@ const bodyIntegrantes = document.getElementById("bodyIntegrantes");
 const integranteCelulaActual = document.getElementById("integranteCelulaActual");
 
 const filtroMiembrosCelula = document.getElementById("filtroMiembrosCelula");
-const filtroMiembrosTipo = document.getElementById("filtroMiembrosTipo");
+const filtroMiembrosLider = document.getElementById("filtroMiembrosLider");
 const bodyMiembros = document.getElementById("bodyMiembros");
 
 const formFecha = document.getElementById("formFecha");
@@ -353,6 +353,7 @@ function refrescarEstadoSesionUI() {
   usuarioSuperior.textContent = `Usuario: ${sesion.nombre} (${sesion.rol})`;
   usuarioSuperior.classList.remove("oculto");
   btnNavAdmin.classList.toggle("oculto", !esAdmin());
+  btnNavMiembros.classList.toggle("oculto", !esAdmin());
 
   const mostrarRegistro = puedeRegistrar();
   btnNavReportes.classList.toggle("oculto", !sesion);
@@ -1277,11 +1278,31 @@ function cargarTablaAsistencia() {
 }
 
 function actualizarFiltroMiembros() {
-  if (!filtroMiembrosCelula) return;
+  if (!filtroMiembrosCelula || !filtroMiembrosLider) return;
   
-  const prev = filtroMiembrosCelula.value;
+  const prevCelula = filtroMiembrosCelula.value;
+  const prevLider = filtroMiembrosLider.value;
+  
+  // Actualizar filtro de líderes
+  filtroMiembrosLider.innerHTML = "";
+  const optAllLider = document.createElement("option");
+  optAllLider.value = "";
+  optAllLider.textContent = "Todos los líderes";
+  filtroMiembrosLider.appendChild(optAllLider);
+  
+  const lideresUnicos = [...new Set(users.filter((u) => u.rol === "lider").map((u) => u.id))];
+  lideresUnicos.forEach((liderId) => {
+    const lider = users.find((u) => u.id === liderId);
+    if (lider) {
+      const opt = document.createElement("option");
+      opt.value = liderId;
+      opt.textContent = lider.nombre;
+      filtroMiembrosLider.appendChild(opt);
+    }
+  });
+  
+  // Actualizar filtro de células
   filtroMiembrosCelula.innerHTML = "";
-  
   celulas.forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -1290,8 +1311,10 @@ function actualizarFiltroMiembros() {
   });
   
   if (celulas.length > 0) {
-    filtroMiembrosCelula.value = prev || celulas[0].id;
+    filtroMiembrosCelula.value = prevCelula || celulas[0].id;
   }
+  
+  filtroMiembrosLider.value = prevLider || "";
 }
 
 function renderMiembrosTabla() {
@@ -1300,21 +1323,28 @@ function renderMiembrosTabla() {
   bodyMiembros.innerHTML = "";
   
   const celulaId = filtroMiembrosCelula?.value;
-  const tipo = filtroMiembrosTipo?.value;
+  const liderId = filtroMiembrosLider?.value;
   
-  if (!celulaId) return;
-  
-  let miembrosFiltrados = miembros.filter((m) => m.celulaId === celulaId);
-  if (tipo) {
-    miembrosFiltrados = miembrosFiltrados.filter((m) => m.tipo === tipo);
+  // Si se selecciona un líder, filtrar por la célula del líder
+  let celulaFiltro = celulaId;
+  if (liderId) {
+    const lider = users.find((u) => u.id === liderId);
+    celulaFiltro = lider?.celulaId;
   }
   
-  if (miembrosFiltrados.length === 0) {
-    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>No hay miembros en esta célula</td></tr>";
+  if (!celulaFiltro) {
+    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>Selecciona un líder o una célula</td></tr>";
     return;
   }
   
-  miembrosFiltrados.forEach((m, idx) => {
+  let miembrosFiltrados = miembros.filter((m) => m.celulaId === celulaFiltro);
+  
+  if (miembrosFiltrados.length === 0) {
+    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>No hay miembros en esta selección</td></tr>";
+    return;
+  }
+  
+  miembrosFiltrados.forEach((m) => {
     const fila = document.createElement("tr");
     const edad = calcularEdad(m.nacimiento);
     
@@ -1779,7 +1809,7 @@ filtroFechaReporte.addEventListener("change", renderReporte);
 mesAsistencia.addEventListener("change", cargarTablaAsistencia);
 
 filtroMiembrosCelula.addEventListener("change", renderMiembrosTabla);
-filtroMiembrosTipo.addEventListener("change", renderMiembrosTabla);
+filtroMiembrosLider.addEventListener("change", renderMiembrosTabla);
 
 formIntegrante.addEventListener("submit", (e) => {
   e.preventDefault();
