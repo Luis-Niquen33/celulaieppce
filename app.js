@@ -136,6 +136,7 @@ const usuarioSuperior = document.getElementById("usuarioSuperior");
 const btnNavDashboard = document.getElementById("btnNavDashboard");
 const btnNavReportes = document.getElementById("btnNavReportes");
 const btnNavIntegrantes = document.getElementById("btnNavIntegrantes");
+const btnNavMiembros = document.getElementById("btnNavMiembros");
 const btnNavFechas = document.getElementById("btnNavFechas");
 const btnNavAsistencia = document.getElementById("btnNavAsistencia");
 const btnNavAdmin = document.getElementById("btnNavAdmin");
@@ -165,6 +166,10 @@ const btnGuardarIntegrante = document.getElementById("btnGuardarIntegrante");
 const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
 const bodyIntegrantes = document.getElementById("bodyIntegrantes");
 const integranteCelulaActual = document.getElementById("integranteCelulaActual");
+
+const filtroMiembrosCelula = document.getElementById("filtroMiembrosCelula");
+const filtroMiembrosTipo = document.getElementById("filtroMiembrosTipo");
+const bodyMiembros = document.getElementById("bodyMiembros");
 
 const formFecha = document.getElementById("formFecha");
 const fechaAsistencia = document.getElementById("fechaAsistencia");
@@ -1271,6 +1276,124 @@ function cargarTablaAsistencia() {
   });
 }
 
+function actualizarFiltroMiembros() {
+  if (!filtroMiembrosCelula) return;
+  
+  const prev = filtroMiembrosCelula.value;
+  filtroMiembrosCelula.innerHTML = "";
+  
+  celulas.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.nombre;
+    filtroMiembrosCelula.appendChild(opt);
+  });
+  
+  if (celulas.length > 0) {
+    filtroMiembrosCelula.value = prev || celulas[0].id;
+  }
+}
+
+function renderMiembrosTabla() {
+  if (!bodyMiembros) return;
+  
+  bodyMiembros.innerHTML = "";
+  
+  const celulaId = filtroMiembrosCelula?.value;
+  const tipo = filtroMiembrosTipo?.value;
+  
+  if (!celulaId) return;
+  
+  let miembrosFiltrados = miembros.filter((m) => m.celulaId === celulaId);
+  if (tipo) {
+    miembrosFiltrados = miembrosFiltrados.filter((m) => m.tipo === tipo);
+  }
+  
+  if (miembrosFiltrados.length === 0) {
+    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>No hay miembros en esta célula</td></tr>";
+    return;
+  }
+  
+  miembrosFiltrados.forEach((m, idx) => {
+    const fila = document.createElement("tr");
+    const edad = calcularEdad(m.nacimiento);
+    
+    const acciones = `
+      <div class="integrante-acciones">
+        <button class='btn btn-editar' data-member-id='${m.id}' data-celula-id='${m.celulaId}'>Editar</button>
+        <button class='btn btn-mover' data-member-id='${m.id}' data-celula-id='${m.celulaId}'>Mover</button>
+        <button class='btn btn-eliminar' data-member-id='${m.id}' data-celula-id='${m.celulaId}'>Eliminar</button>
+      </div>
+    `;
+    
+    fila.innerHTML = `
+      <td>${m.nombre}</td>
+      <td><span class="badge-tipo">${m.tipo}</span></td>
+      <td>${m.celular || "-"}</td>
+      <td>${edad || "-"}</td>
+      <td>${obtenerNombreCelula(m.celulaId)}</td>
+      <td>${acciones}</td>
+    `;
+    bodyMiembros.appendChild(fila);
+  });
+}
+
+function editarMiembroCelula(miembro, celulaId) {
+  const nuevoNombre = prompt("Nuevo nombre:", miembro.nombre);
+  if (nuevoNombre === null) return;
+  
+  if (!nuevoNombre.trim()) {
+    alert("El nombre no puede estar vacío.");
+    return;
+  }
+  
+  const idx = miembros.findIndex((m) => m.id === miembro.id);
+  if (idx === -1) return;
+  
+  miembros[idx].nombre = nuevoNombre.trim();
+  
+  guardarDatos();
+  renderMiembrosTabla();
+  renderDashboard();
+  renderReporte();
+}
+
+function moverMiembroCelula(miembro, celulaActual) {
+  const celulasOtras = celulas.filter((c) => c.id !== celulaActual);
+  
+  if (celulasOtras.length === 0) {
+    alert("No hay otras células para mover este miembro.");
+    return;
+  }
+  
+  let mensaje = "Selecciona la nueva célula:\n\n";
+  celulasOtras.forEach((c, idx) => {
+    mensaje += `${idx + 1}. ${c.nombre}\n`;
+  });
+  
+  const respuesta = prompt(mensaje);
+  if (respuesta === null) return;
+  
+  const idx = parseInt(respuesta) - 1;
+  if (idx < 0 || idx >= celulasOtras.length) {
+    alert("Opción inválida.");
+    return;
+  }
+  
+  const nuevaCelulaId = celulasOtras[idx].id;
+  
+  const idxMiembro = miembros.findIndex((m) => m.id === miembro.id);
+  if (idxMiembro === -1) return;
+  
+  miembros[idxMiembro].celulaId = nuevaCelulaId;
+  
+  guardarDatos();
+  renderMiembrosTabla();
+  renderDashboard();
+  renderReporte();
+  refrescarTodo();
+}
+
 function renderAdmin() {
   if (!esAdmin()) return;
 
@@ -1384,8 +1507,10 @@ function modoEditarUsuario(userId) {
 function refrescarTodo() {
   refrescarEstadoSesionUI();
   actualizarFiltroCelulas();
+  actualizarFiltroMiembros();
   renderIntegrantes();
   renderFechas();
+  renderMiembrosTabla();
   actualizarSelectorMesAsistencia();
   cargarTablaAsistencia();
   renderDashboard();
@@ -1573,6 +1698,12 @@ btnNavIntegrantes.addEventListener("click", () => {
   renderIntegrantes();
 });
 
+btnNavMiembros.addEventListener("click", () => {
+  activarSeccion("seccionMiembros", btnNavMiembros);
+  actualizarFiltroMiembros();
+  renderMiembrosTabla();
+});
+
 btnNavFechas.addEventListener("click", () => {
   if (!puedeRegistrar()) return;
   activarSeccion("seccionFechas", btnNavFechas);
@@ -1647,6 +1778,9 @@ filtroMesReporte.addEventListener("change", renderReporte);
 filtroFechaReporte.addEventListener("change", renderReporte);
 mesAsistencia.addEventListener("change", cargarTablaAsistencia);
 
+filtroMiembrosCelula.addEventListener("change", renderMiembrosTabla);
+filtroMiembrosTipo.addEventListener("change", renderMiembrosTabla);
+
 formIntegrante.addEventListener("submit", (e) => {
   e.preventDefault();
   if (!puedeRegistrar()) return;
@@ -1713,6 +1847,54 @@ bodyIntegrantes.addEventListener("click", (e) => {
     renderDashboard();
     renderReporte();
     cargarTablaAsistencia();
+  }
+});
+
+bodyMiembros.addEventListener("click", (e) => {
+  if (e.target.classList.contains("btn-editar")) {
+    const miembroId = e.target.dataset.memberId;
+    const celulaidAct = e.target.dataset.celulaId;
+    if (!miembroId) return;
+    
+    const miembro = miembros.find((m) => String(m.id) === miembroId);
+    if (!miembro) return;
+    
+    editarMiembroCelula(miembro, celulaidAct);
+    return;
+  }
+  
+  if (e.target.classList.contains("btn-eliminar")) {
+    const miembroId = e.target.dataset.memberId;
+    if (!miembroId) return;
+    
+    const ok = confirm("¿Estás seguro de que deseas eliminar este miembro?");
+    if (!ok) return;
+    
+    const celulaId = e.target.dataset.celulaId;
+    miembros = miembros.filter((m) => String(m.id) !== miembroId);
+    
+    Object.keys(asistencias).forEach((k) => {
+      if (k.startsWith(`${celulaId}-${miembroId}-`)) delete asistencias[k];
+    });
+    
+    guardarDatos();
+    renderMiembrosTabla();
+    renderDashboard();
+    renderReporte();
+    cargarTablaAsistencia();
+    return;
+  }
+  
+  if (e.target.classList.contains("btn-mover")) {
+    const miembroId = e.target.dataset.memberId;
+    const celulaActual = e.target.dataset.celulaId;
+    if (!miembroId) return;
+    
+    const miembro = miembros.find((m) => String(m.id) === miembroId);
+    if (!miembro) return;
+    
+    moverMiembroCelula(miembro, celulaActual);
+    return;
   }
 });
 
