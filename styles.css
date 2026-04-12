@@ -314,7 +314,8 @@ h1 {
   background: white;
   border-radius: 14px;
   overflow: hidden;
-  min-width: 680px;
+  min-width: 0;
+  width: 100%;
 }
 
 .tabla-integrantes td,
@@ -324,6 +325,8 @@ h1 {
   text-align: center;
   font-size: 12px;
   line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .tabla-integrantes tbody tr:nth-child(even) {
@@ -595,12 +598,13 @@ h1 {
 
 #seccionAdmin .tabla-integrantes {
   table-layout: fixed;
-  min-width: 560px;
+  min-width: 0;
+  width: 100%;
 }
 
 #seccionAdmin .tabla-integrantes td:last-child,
 #seccionAdmin .tabla-integrantes th:last-child {
-  width: 190px;
+  width: 160px;
 }
 
 .form-usuario input,
