@@ -310,7 +310,8 @@ h1 {
 
 .tabla-integrantes-wrap {
   margin-top: 8px;
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tabla-integrantes {
@@ -321,7 +322,7 @@ h1 {
   overflow: hidden;
   min-width: 0;
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .tabla-integrantes td,
@@ -331,8 +332,7 @@ h1 {
   text-align: center;
   font-size: 12px;
   line-height: 1.35;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
 .tabla-integrantes tbody tr:nth-child(even) {
@@ -994,11 +994,22 @@ input[type="text"] {
   #previewReporte table {
     min-width: unset;
     font-size: 12px;
+    table-layout: auto;
+  }
+  .tabla-integrantes-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 8px;
   }
   .tabla-integrantes td,
   .tabla-integrantes th {
-    padding: 6px 4px;
-    font-size: 11px;
+    padding: 5px 6px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .tabla-integrantes th {
+    background: var(--color-primary);
+    color: white;
   }
   .tabla-integrantes .integrante-acciones {
     flex-direction: column;
