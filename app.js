@@ -1,6 +1,4 @@
-const defaultCelulas = [
-  { id: "cel-1", nombre: "Célula Central" }
-];
+const defaultCelulas = [];
 
 const defaultUsers = [
   {
@@ -10,23 +8,10 @@ const defaultUsers = [
     password: "admin123",
     rol: "admin",
     celulaId: null
-  },
-  {
-    id: "u-lider-1",
-    nombre: "Líder Central",
-    username: "lider1",
-    password: "123456",
-    rol: "lider",
-    celulaId: "cel-1"
   }
 ];
 
-const defaultMiembros = [
-  { id: 1, celulaId: "cel-1", nombre: "Luis Ñiquen", tipo: "Pleno", nacimiento: "", celular: "" },
-  { id: 2, celulaId: "cel-1", nombre: "Rosa Llontop", tipo: "Oyente", nacimiento: "", celular: "" },
-  { id: 3, celulaId: "cel-1", nombre: "Leoncio Puican", tipo: "Pleno", nacimiento: "", celular: "" },
-  { id: 4, celulaId: "cel-1", nombre: "Marisabel Davila", tipo: "Pleno", nacimiento: "", celular: "" }
-];
+const defaultMiembros = [];
 
 const APP_VERSION = "20260408-2";
 
@@ -94,11 +79,11 @@ let miembros = _rawMiembros.map((m) => ({
 const _rawFechas = loadJson("fechas", []);
 let fechas = _rawFechas.map((f) => {
   if (typeof f === "string") {
-    return { celulaId: celulas[0]?.id || "cel-1", fecha: f, leccion: "", ofrenda: 0 };
+    return { celulaId: celulas[0]?.id ?? null, fecha: f, leccion: "", ofrenda: 0 };
   }
 
   return {
-    celulaId: celulas[0]?.id || "cel-1",
+    celulaId: celulas[0]?.id ?? null,
     leccion: "",
     ofrenda: 0,
     ...f
@@ -108,11 +93,11 @@ let fechas = _rawFechas.map((f) => {
 let asistencias = loadJson("asistencias", {});
 
 function migrarAsistenciasAntiguas() {
-  const celulaPorDefecto = celulas[0]?.id || "cel-1";
+  const celulaPorDefecto = celulas[0]?.id;
   const nuevo = {};
   Object.entries(asistencias).forEach(([key, value]) => {
     const partes = key.split("-");
-    if (partes.length === 2) {
+    if (partes.length === 2 && celulaPorDefecto) {
       nuevo[`${celulaPorDefecto}-${key}`] = value;
     } else {
       nuevo[key] = value;
@@ -1283,26 +1268,25 @@ function actualizarFiltroMiembros() {
   const prevCelula = filtroMiembrosCelula.value;
   const prevLider = filtroMiembrosLider.value;
   
-  // Actualizar filtro de líderes
   filtroMiembrosLider.innerHTML = "";
-  const optAllLider = document.createElement("option");
-  optAllLider.value = "";
-  optAllLider.textContent = "Todos los líderes";
-  filtroMiembrosLider.appendChild(optAllLider);
-  
-  const lideresUnicos = [...new Set(users.filter((u) => u.rol === "lider").map((u) => u.id))];
-  lideresUnicos.forEach((liderId) => {
-    const lider = users.find((u) => u.id === liderId);
-    if (lider) {
-      const opt = document.createElement("option");
-      opt.value = liderId;
-      opt.textContent = lider.nombre;
-      filtroMiembrosLider.appendChild(opt);
-    }
+  const optTodosLideres = document.createElement("option");
+  optTodosLideres.value = "";
+  optTodosLideres.textContent = "Todos los líderes";
+  filtroMiembrosLider.appendChild(optTodosLideres);
+
+  users.filter((u) => u.rol === "lider").forEach((lider) => {
+    const opt = document.createElement("option");
+    opt.value = lider.id;
+    opt.textContent = lider.nombre;
+    filtroMiembrosLider.appendChild(opt);
   });
   
-  // Actualizar filtro de células
   filtroMiembrosCelula.innerHTML = "";
+  const optTodasCelulas = document.createElement("option");
+  optTodasCelulas.value = "";
+  optTodasCelulas.textContent = "Todas las células";
+  filtroMiembrosCelula.appendChild(optTodasCelulas);
+
   celulas.forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -1310,11 +1294,8 @@ function actualizarFiltroMiembros() {
     filtroMiembrosCelula.appendChild(opt);
   });
   
-  if (celulas.length > 0) {
-    filtroMiembrosCelula.value = prevCelula || celulas[0].id;
-  }
-  
-  filtroMiembrosLider.value = prevLider || "";
+  filtroMiembrosCelula.value = prevCelula ?? "";
+  filtroMiembrosLider.value = prevLider ?? "";
 }
 
 function renderMiembrosTabla() {
@@ -1325,22 +1306,23 @@ function renderMiembrosTabla() {
   const celulaId = filtroMiembrosCelula?.value;
   const liderId = filtroMiembrosLider?.value;
   
-  // Si se selecciona un líder, filtrar por la célula del líder
-  let celulaFiltro = celulaId;
+  let miembrosFiltrados = [...miembros];
+  
   if (liderId) {
     const lider = users.find((u) => u.id === liderId);
-    celulaFiltro = lider?.celulaId;
+    if (lider?.celulaId) {
+      miembrosFiltrados = miembrosFiltrados.filter((m) => m.celulaId === lider.celulaId);
+    } else {
+      miembrosFiltrados = [];
+    }
   }
   
-  if (!celulaFiltro) {
-    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>Selecciona un líder o una célula</td></tr>";
-    return;
+  if (celulaId) {
+    miembrosFiltrados = miembrosFiltrados.filter((m) => m.celulaId === celulaId);
   }
-  
-  let miembrosFiltrados = miembros.filter((m) => m.celulaId === celulaFiltro);
   
   if (miembrosFiltrados.length === 0) {
-    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>No hay miembros en esta selección</td></tr>";
+    bodyMiembros.innerHTML = "<tr><td colspan='6' style='text-align: center; padding: 20px;'>No hay miembros para esta selección.</td></tr>";
     return;
   }
   
@@ -1455,60 +1437,8 @@ function renderAdmin() {
     `;
     bodyUsuarios.appendChild(fila);
   });
-
-  renderMiembrosPorCelula();
 }
-
-function renderMiembrosPorCelula() {
-  const listaMiembros = document.getElementById("listaMiembrosCelulas");
-  if (!listaMiembros) return;
-
-  listaMiembros.innerHTML = "";
-
-  celulas.forEach((celula) => {
-    const miembrosCelula = miembros.filter((m) => m.celulaId === celula.id);
     
-    const contenedorCelula = document.createElement("div");
-    contenedorCelula.className = "celula-miembros-contenedor";
-    
-    const tituloCelula = document.createElement("h5");
-    tituloCelula.className = "titulo-celula-miembros";
-    tituloCelula.textContent = `${celula.nombre} (${miembrosCelula.length} miembro/s)`;
-    contenedorCelula.appendChild(tituloCelula);
-    
-    const tabla = document.createElement("table");
-    tabla.className = "tabla-miembros-admin";
-    
-    const thead = document.createElement("thead");
-    thead.innerHTML = `
-      <tr>
-        <th>N°</th>
-        <th>Nombre</th>
-        <th>Tipo</th>
-        <th>F. Nacimiento</th>
-        <th>Celular</th>
-      </tr>
-    `;
-    tabla.appendChild(thead);
-    
-    const tbody = document.createElement("tbody");
-    miembrosCelula.forEach((miembro, index) => {
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${miembro.nombre}</td>
-        <td><span class="badge-tipo">${miembro.tipo}</span></td>
-        <td>${miembro.nacimiento || "-"}</td>
-        <td>${miembro.celular || "-"}</td>
-      `;
-      tbody.appendChild(fila);
-    });
-    tabla.appendChild(tbody);
-    
-    contenedorCelula.appendChild(tabla);
-    listaMiembros.appendChild(contenedorCelula);
-  });
-}
 
 function cancelarEdicionUsuario() {
   if (editandoUsuarioId) editandoUsuarioId.value = "";

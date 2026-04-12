@@ -51,6 +51,22 @@ h1 {
   backdrop-filter: blur(10px);
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: white;
+  padding: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
 .usuario-superior {
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
@@ -318,6 +334,34 @@ h1 {
   text-align: left;
   font-weight: bold;
   color: var(--color-primary-strong);
+}
+
+.tabla-integrantes th,
+.tabla-integrantes td {
+  white-space: nowrap;
+}
+
+#previewReporte,
+.panel-admin {
+  overflow-x: auto;
+}
+
+#previewReporte table,
+.tabla-integrantes {
+  min-width: 720px;
+}
+
+#previewReporte table th,
+#previewReporte table td,
+.tabla-integrantes th,
+.tabla-integrantes td {
+  padding: 10px 12px;
+}
+
+.panel-admin {
+  border-radius: 20px;
+  padding: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
 }
 
 .tabla-integrantes .integrante-acciones {
@@ -727,6 +771,19 @@ input[type="text"] {
   .panel-inicio {
     flex-direction: column;
   }
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .brand {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .app-logo {
+    width: 42px;
+    height: 42px;
+  }
   .sidebar {
     width: 100%;
     min-width: unset;
@@ -739,10 +796,27 @@ input[type="text"] {
     width: 100%;
     margin-bottom: 0;
   }
+  .btn-nav {
+    min-height: 40px;
+    font-size: 13px;
+  }
   .sidebar-pie {
     margin-top: 0;
+    width: 100%;
+  }
+  .sidebar-pie .btn-nav,
+  .sidebar-pie .texto-sesion {
+    width: 100%;
+  }
+  .contenido-inicio {
+    padding: 12px;
+  }
+  .tabla-integrantes,
+  #previewReporte table {
+    min-width: unset;
   }
 }
+
 
 .btn-limpiar {
   width: 100%;
