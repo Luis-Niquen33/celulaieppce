@@ -300,6 +300,12 @@ function ordenarCelulasLista(lista) {
   );
 }
 
+function ordenarUsuariosLista(lista) {
+  return [...lista].sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" })
+  );
+}
+
 function formatearFecha(isoDate) {
   const [anio, mes, dia] = isoDate.split("-");
   return `${dia}/${mes}/${anio}`;
@@ -1451,7 +1457,7 @@ function renderAdmin() {
   });
 
   bodyUsuarios.innerHTML = "";
-  users.forEach((u) => {
+  ordenarUsuariosLista(users).forEach((u) => {
     const fila = document.createElement("tr");
     const celNombre = u.rol === "admin" ? "Todas" : obtenerNombreCelula(u.celulaId);
     const acciones = `
