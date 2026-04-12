@@ -58,10 +58,14 @@ h1 {
 }
 
 .app-logo {
-  width: 52px;
-  height: 52px;
+  display: block;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
   object-fit: contain;
   border-radius: 18px;
+  background: white;
+  padding: 8px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -794,8 +798,10 @@ input[type="text"] {
     justify-content: flex-start;
   }
   .app-logo {
-    width: 42px;
-    height: 42px;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    padding: 6px;
   }
   .sidebar {
     width: 100%;
