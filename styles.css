@@ -796,6 +796,14 @@ h1 {
   margin-bottom: 10px;
 }
 
+.fila-formulario input,
+.fila-formulario select,
+.form-usuario input,
+.form-usuario select {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
 input,
 select {
   height: 36px;
@@ -815,7 +823,8 @@ select:focus {
 }
 
 input[type="text"] {
-  min-width: 260px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .btn {
