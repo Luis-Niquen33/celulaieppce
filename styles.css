@@ -411,6 +411,10 @@ h1 {
   padding: 5px 10px;
 }
 
+.tabla-integrantes td:last-child {
+  white-space: nowrap;
+}
+
 .celula-acciones .btn {
   font-size: 10px;
   padding: 5px 10px;
@@ -421,12 +425,23 @@ h1 {
 .integrante-acciones,
 .celula-acciones {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 6px;
   justify-content: flex-end;
   align-items: center;
 }
 
+#seccionMiembros .tabla-integrantes th:nth-child(4),
+#seccionMiembros .tabla-integrantes td:nth-child(4) {
+  width: 70px;
+  min-width: 70px;
+}
+
+#seccionMiembros .tabla-integrantes th:nth-child(6),
+#seccionMiembros .tabla-integrantes td:nth-child(6) {
+  min-width: 170px;
+  width: 170px;
+}
 /* ── Tarjeta de integrante en lista ── */
 .tarjeta-integrante {
   flex-direction: column !important;
