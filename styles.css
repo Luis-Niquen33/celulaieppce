@@ -228,6 +228,7 @@ h1 {
   flex: 1;
   padding: 28px;
   overflow-y: auto;
+  overflow-x: hidden;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
@@ -374,6 +375,8 @@ h1 {
   border-radius: 20px;
   padding: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tabla-integrantes .integrante-acciones {
@@ -506,6 +509,9 @@ h1 {
   border-radius: 24px;
   padding: 26px;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .subseccion h3 {

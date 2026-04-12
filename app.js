@@ -294,6 +294,12 @@ function obtenerNombreCelula(id) {
   return celulas.find((c) => c.id === id)?.nombre || "Sin célula";
 }
 
+function ordenarCelulasLista(lista) {
+  return [...lista].sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" })
+  );
+}
+
 function formatearFecha(isoDate) {
   const [anio, mes, dia] = isoDate.split("-");
   return `${dia}/${mes}/${anio}`;
@@ -380,7 +386,7 @@ function actualizarFiltroCelulas() {
     filtroCelulaDashboard.appendChild(optAll);
   }
 
-  visibles.forEach((c) => {
+  ordenarCelulasLista(visibles).forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
     opt.textContent = c.nombre;
@@ -400,7 +406,7 @@ function actualizarFiltroCelulas() {
   actualizarFiltroLideresDashboard();
 
   celulaUsuarioNuevo.innerHTML = "";
-  celulas.forEach((c) => {
+  ordenarCelulasLista(celulas).forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
     opt.textContent = c.nombre;
@@ -1429,7 +1435,7 @@ function renderAdmin() {
   if (!esAdmin()) return;
 
   listaCelulas.innerHTML = "";
-  celulas.forEach((c) => {
+  ordenarCelulasLista(celulas).forEach((c) => {
     const item = document.createElement("li");
     const totalLideres = users.filter((u) => u.celulaId === c.id && u.rol === "lider").length;
     const enEdicion = editandoCelulaId?.value === c.id;
