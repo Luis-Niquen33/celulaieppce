@@ -492,11 +492,33 @@ h1 {
   }
 }
 
+.subseccion {
+  background: #ffffff;
+  border: 1px solid rgba(214, 224, 234, 0.9);
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.subseccion h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: var(--color-primary-strong);
+  font-size: 28px;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
 .panel-admin {
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  padding: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid rgba(214, 224, 234, 0.85);
+  border-radius: 22px;
+  padding: 24px;
+  background: #fff;
   box-shadow: var(--shadow-sm);
   border-top: 4px solid var(--color-primary);
 }
@@ -523,6 +545,9 @@ h1 {
 .panel-admin .lista li {
   background: #f8fbff;
   border-color: var(--color-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
   transition: background 0.2s ease;
 }
 
@@ -532,9 +557,9 @@ h1 {
 
 .form-usuario {
   display: grid;
-  gap: 8px;
-  grid-template-columns: 1fr;
-  margin-bottom: 12px;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 16px;
 }
 
 .form-usuario input,
@@ -543,12 +568,20 @@ h1 {
 .panel-admin .fila-formulario select {
   min-width: 0;
   width: 100%;
+  background: #f8fbff;
+  border: 1px solid rgba(214, 224, 234, 0.9);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
-@media (min-width: 1200px) {
+@media (max-width: 1024px) {
   .form-usuario {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
+}
+
+.form-usuario .btn {
+  grid-column: 1 / -1;
 }
 
 .form-usuario .btn {
