@@ -92,6 +92,23 @@ let fechas = _rawFechas.map((f) => {
 
 let asistencias = loadJson("asistencias", {});
 
+function eliminarCelulaCentralAntigua() {
+  const centralId = "cel-1";
+  const centralName = "Célula Central";
+  const existeCentral = celulas.some((c) => c.id === centralId || c.nombre === centralName);
+  if (!existeCentral) return;
+
+  celulas = celulas.filter((c) => c.id !== centralId && c.nombre !== centralName);
+  users = users.map((u) => (u.celulaId === centralId ? { ...u, celulaId: null } : u));
+  miembros = miembros.map((m) => (m.celulaId === centralId ? { ...m, celulaId: null } : m));
+  fechas = fechas.map((f) => (f.celulaId === centralId ? { ...f, celulaId: null } : f));
+  Object.keys(asistencias).forEach((key) => {
+    if (key.startsWith(`${centralId}-`)) delete asistencias[key];
+  });
+}
+
+eliminarCelulaCentralAntigua();
+
 function migrarAsistenciasAntiguas() {
   const celulaPorDefecto = celulas[0]?.id;
   const nuevo = {};

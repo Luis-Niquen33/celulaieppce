@@ -303,6 +303,7 @@ h1 {
 
 .tabla-integrantes-wrap {
   margin-top: 8px;
+  overflow-x: auto;
 }
 
 .tabla-integrantes {
@@ -311,6 +312,7 @@ h1 {
   background: white;
   border-radius: 14px;
   overflow: hidden;
+  min-width: 680px;
 }
 
 .tabla-integrantes td,
@@ -348,7 +350,7 @@ h1 {
 
 #previewReporte table,
 .tabla-integrantes {
-  min-width: 720px;
+  min-width: 680px;
 }
 
 #previewReporte table th,
