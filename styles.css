@@ -399,6 +399,17 @@ h1 {
 .tabla-integrantes .btn-editar,
 .tabla-integrantes .btn-eliminar {
   height: 32px;
+  font-size: 12px;
+  padding: 6px 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.celula-acciones .btn {
+  font-size: 12px;
+  padding: 6px 10px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* ── Tarjeta de integrante en lista ── */
