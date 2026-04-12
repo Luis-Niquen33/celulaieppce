@@ -400,15 +400,20 @@ h1 {
 .tabla-integrantes .btn-eliminar {
   height: auto;
   min-height: 32px;
-  font-size: 11px;
-  padding: 6px 10px;
+  font-size: 10px;
+  padding: 5px 10px;
   line-height: 1.2;
   white-space: nowrap;
 }
 
+.tabla-integrantes .btn {
+  font-size: 10px;
+  padding: 5px 10px;
+}
+
 .celula-acciones .btn {
-  font-size: 11px;
-  padding: 6px 10px;
+  font-size: 10px;
+  padding: 5px 10px;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -630,10 +635,9 @@ h1 {
 
 .form-usuario .btn {
   grid-column: 1 / -1;
-}
-
-.form-usuario .btn {
-  grid-column: 1 / -1;
+  font-size: 11px;
+  padding: 8px 12px;
+  min-height: 36px;
 }
 
 .tabla-scroll {
