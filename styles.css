@@ -360,7 +360,7 @@ h1 {
 }
 
 .panel-admin {
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 #previewReporte table,
@@ -398,18 +398,28 @@ h1 {
 
 .tabla-integrantes .btn-editar,
 .tabla-integrantes .btn-eliminar {
-  height: 32px;
-  font-size: 12px;
+  height: auto;
+  min-height: 32px;
+  font-size: 11px;
   padding: 6px 10px;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .celula-acciones .btn {
-  font-size: 12px;
+  font-size: 11px;
   padding: 6px 10px;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+.integrante-acciones,
+.celula-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 /* ── Tarjeta de integrante en lista ── */
@@ -628,7 +638,7 @@ h1 {
 
 .tabla-scroll {
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 #seccionAdmin .admin-grid {
@@ -640,10 +650,11 @@ h1 {
 }
 
 #seccionAdmin .panel-admin {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
+  background: #f8fbff;
+  border: 1px solid rgba(214, 224, 234, 0.75);
+  box-shadow: inset 0 0 0 rgba(0, 0, 0, 0);
+  padding: 22px;
+  border-radius: 18px;
 }
 
 #seccionAdmin .panel-admin h4 {
@@ -657,14 +668,15 @@ h1 {
 }
 
 #seccionAdmin .tabla-integrantes {
-  table-layout: fixed;
+  table-layout: auto;
   min-width: 0;
   width: 100%;
 }
 
 #seccionAdmin .tabla-integrantes td:last-child,
 #seccionAdmin .tabla-integrantes th:last-child {
-  width: 160px;
+  min-width: 180px;
+  width: auto;
 }
 
 .form-usuario input,
@@ -677,6 +689,10 @@ h1 {
 #seccionAdmin .tabla-integrantes th {
   background: var(--color-primary);
   color: #fff;
+}
+
+#seccionAdmin .panel-admin + .panel-admin {
+  margin-top: 18px;
 }
 
 #seccionAdmin .tabla-integrantes td,
@@ -871,14 +887,7 @@ input[type="text"] {
   padding: 0 14px;
   cursor: pointer;
   font-weight: bold;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
-}
-
+    white-space: nowrap;
 .btn-principal,
 .btn-grande {
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
