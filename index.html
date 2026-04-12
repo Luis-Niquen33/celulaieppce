@@ -201,8 +201,10 @@
           <div class="panel-admin">
             <h4>Células</h4>
             <form id="formCelula" class="fila-formulario">
+              <input id="editandoCelulaId" type="hidden" value="">
               <input id="nombreCelula" type="text" placeholder="Nombre de célula" required>
               <button type="submit" class="btn btn-principal">Crear célula</button>
+              <button type="button" id="btnCancelarCelula" class="btn btn-gris oculto">Cancelar</button>
             </form>
             <ul id="listaCelulas" class="lista"></ul>
           </div>

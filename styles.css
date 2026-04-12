@@ -345,17 +345,21 @@ h1 {
 
 .tabla-integrantes th,
 .tabla-integrantes td {
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
-#previewReporte,
-.panel-admin {
+#previewReporte {
   overflow-x: auto;
+}
+
+.panel-admin {
+  overflow-x: hidden;
 }
 
 #previewReporte table,
 .tabla-integrantes {
-  min-width: 680px;
+  min-width: 0;
 }
 
 #previewReporte table th,
@@ -593,7 +597,7 @@ h1 {
 
 .tabla-scroll {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 #seccionAdmin .tabla-integrantes {
@@ -897,11 +901,23 @@ input[type="text"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px 12px;
   margin-bottom: 8px;
   background: #fff;
+}
+
+.celula-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.celula-acciones .btn {
+  min-width: 80px;
 }
 
 .encabezado-asistencia {

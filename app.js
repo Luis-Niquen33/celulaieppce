@@ -189,6 +189,8 @@ const bodyTabla = document.getElementById("bodyTabla");
 
 const formCelula = document.getElementById("formCelula");
 const nombreCelula = document.getElementById("nombreCelula");
+const editandoCelulaId = document.getElementById("editandoCelulaId");
+const btnCancelarCelula = document.getElementById("btnCancelarCelula");
 const listaCelulas = document.getElementById("listaCelulas");
 const formUsuario = document.getElementById("formUsuario");
 const nombreUsuario = document.getElementById("nombreUsuario");
@@ -1430,7 +1432,13 @@ function renderAdmin() {
   celulas.forEach((c) => {
     const item = document.createElement("li");
     const totalLideres = users.filter((u) => u.celulaId === c.id && u.rol === "lider").length;
-    item.innerHTML = `<span>${c.nombre} (${totalLideres} líder/es)</span>`;
+    item.innerHTML = `
+      <span>${c.nombre} (${totalLideres} líder/es)</span>
+      <div class="celula-acciones">
+        <button class='btn btn-editar' data-celula-id='${c.id}' data-celula-action='editar'>Editar</button>
+        <button class='btn btn-eliminar' data-celula-id='${c.id}' data-celula-action='eliminar'>Eliminar</button>
+      </div>
+    `;
     listaCelulas.appendChild(item);
   });
 
@@ -1464,6 +1472,25 @@ function cancelarEdicionUsuario() {
   if (btnCancelarUsuario) btnCancelarUsuario.classList.add("oculto");
   if (rolUsuarioNuevo) rolUsuarioNuevo.value = "lider";
   if (celulaUsuarioNuevo) celulaUsuarioNuevo.disabled = false;
+}
+
+function cancelarEdicionCelula() {
+  if (editandoCelulaId) editandoCelulaId.value = "";
+  if (formCelula) formCelula.reset();
+  const botonCelula = formCelula.querySelector("button[type='submit']");
+  if (botonCelula) botonCelula.textContent = "Crear célula";
+  if (btnCancelarCelula) btnCancelarCelula.classList.add("oculto");
+}
+
+function modoEditarCelula(celulaId) {
+  const celula = celulas.find((c) => c.id === celulaId);
+  if (!celula) return;
+
+  editandoCelulaId.value = celula.id;
+  nombreCelula.value = celula.nombre;
+  const botonCelula = formCelula.querySelector("button[type='submit']");
+  if (botonCelula) botonCelula.textContent = "Guardar cambios";
+  if (btnCancelarCelula) btnCancelarCelula.classList.remove("oculto");
 }
 
 function modoEditarUsuario(userId) {
@@ -1991,14 +2018,24 @@ formCelula.addEventListener("submit", (e) => {
 
   const nombre = nombreCelula.value.trim();
   if (!nombre) return;
-  if (celulas.some((c) => c.nombre.toLowerCase() === nombre.toLowerCase())) {
+
+  const editId = editandoCelulaId.value;
+  const existeOtra = celulas.some((c) => c.id !== editId && c.nombre.toLowerCase() === nombre.toLowerCase());
+  if (existeOtra) {
     alert("Ya existe una célula con ese nombre.");
     return;
   }
 
-  celulas.push({ id: `cel-${Date.now()}`, nombre });
+  if (editId) {
+    const idx = celulas.findIndex((c) => c.id === editId);
+    if (idx === -1) return;
+    celulas[idx].nombre = nombre;
+  } else {
+    celulas.push({ id: `cel-${Date.now()}`, nombre });
+  }
+
   guardarDatos();
-  nombreCelula.value = "";
+  cancelarEdicionCelula();
   refrescarTodo();
 });
 
@@ -2097,5 +2134,37 @@ bodyUsuarios.addEventListener("click", (e) => {
   guardarDatos();
   refrescarTodo();
 });
+
+if (listaCelulas) {
+  listaCelulas.addEventListener("click", (e) => {
+    if (!esAdmin()) return;
+    const btn = e.target.closest("button[data-celula-id]");
+    if (!btn) return;
+
+    const celulaId = btn.dataset.celulaId;
+    const accion = btn.dataset.celulaAction;
+    if (!celulaId || !accion) return;
+
+    if (accion === "editar") {
+      modoEditarCelula(celulaId);
+      return;
+    }
+
+    if (accion !== "eliminar") return;
+    if (!confirm("¿Eliminar esta célula? Esta acción también puede afectar asignaciones de usuarios y miembros.")) return;
+
+    celulas = celulas.filter((c) => c.id !== celulaId);
+    users = users.map((u) => (u.celulaId === celulaId ? { ...u, celulaId: null } : u));
+    miembros = miembros.map((m) => (m.celulaId === celulaId ? { ...m, celulaId: null } : m));
+    fechas = fechas.map((f) => (f.celulaId === celulaId ? { ...f, celulaId: null } : f));
+    if (editandoCelulaId.value === celulaId) cancelarEdicionCelula();
+    guardarDatos();
+    refrescarTodo();
+  });
+}
+
+if (btnCancelarCelula) {
+  btnCancelarCelula.addEventListener("click", cancelarEdicionCelula);
+}
 
 inicializarSesion();
