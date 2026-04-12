@@ -305,7 +305,7 @@ h1 {
 
 .tabla-integrantes-wrap {
   margin-top: 8px;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .tabla-integrantes {
@@ -316,6 +316,7 @@ h1 {
   overflow: hidden;
   min-width: 0;
   width: 100%;
+  table-layout: fixed;
 }
 
 .tabla-integrantes td,
@@ -907,6 +908,11 @@ input[type="text"] {
   padding: 10px 12px;
   margin-bottom: 8px;
   background: #fff;
+}
+
+.lista li span {
+  flex: 1;
+  min-width: 0;
 }
 
 .celula-acciones {

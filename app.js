@@ -1432,11 +1432,13 @@ function renderAdmin() {
   celulas.forEach((c) => {
     const item = document.createElement("li");
     const totalLideres = users.filter((u) => u.celulaId === c.id && u.rol === "lider").length;
+    const enEdicion = editandoCelulaId?.value === c.id;
     item.innerHTML = `
       <span>${c.nombre} (${totalLideres} líder/es)</span>
       <div class="celula-acciones">
         <button class='btn btn-editar' data-celula-id='${c.id}' data-celula-action='editar'>Editar</button>
         <button class='btn btn-eliminar' data-celula-id='${c.id}' data-celula-action='eliminar'>Eliminar</button>
+        ${enEdicion ? `<button class='btn btn-principal' data-celula-id='${c.id}' data-celula-action='guardar'>Guardar</button>` : ""}
       </div>
     `;
     listaCelulas.appendChild(item);
@@ -2147,6 +2149,13 @@ if (listaCelulas) {
 
     if (accion === "editar") {
       modoEditarCelula(celulaId);
+      return;
+    }
+
+    if (accion === "guardar") {
+      if (formCelula) {
+        formCelula.requestSubmit();
+      }
       return;
     }
 
