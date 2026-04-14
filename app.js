@@ -632,7 +632,11 @@ function renderDashboard() {
   fechasCelula.forEach((f) => {
     let asistio = 0;
     let falto = 0;
-    const miembrosFecha = miembrosCelula.filter((m) => m.celulaId === f.celulaId);
+    const miembrosFecha = miembrosCelula.filter((m) => {
+      if (m.celulaId !== f.celulaId) return false;
+      if (!m.ingreso) return true;
+      return m.ingreso <= f.fecha;
+    });
 
     miembrosFecha.forEach((m) => {
       const estado = asistencias[keyAsistencia(f.celulaId, m.id, f.fecha)];
