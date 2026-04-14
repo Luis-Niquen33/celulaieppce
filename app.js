@@ -163,6 +163,7 @@ const nombreIntegrante = document.getElementById("nombreIntegrante");
 const tipoIntegrante = document.getElementById("tipoIntegrante");
 const nacimientoIntegrante = document.getElementById("nacimientoIntegrante");
 const celularIntegrante = document.getElementById("celularIntegrante");
+const ingresoIntegrante = document.getElementById("ingresoIntegrante");
 const editandoId = document.getElementById("editandoId");
 const btnGuardarIntegrante = document.getElementById("btnGuardarIntegrante");
 const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
@@ -582,7 +583,11 @@ function renderDashboard() {
   let totalFaltas = 0;
   let posibles = 0;
   fechasCelula.forEach((f) => {
-    const miembrosFecha = miembrosCelula.filter((m) => m.celulaId === f.celulaId);
+    const miembrosFecha = miembrosCelula.filter((m) => {
+      if (m.celulaId !== f.celulaId) return false;
+      if (!m.ingreso) return true; // Si no tiene fecha de ingreso, cuenta
+      return f.fecha >= m.ingreso; // Solo si la fecha es posterior o igual al ingreso
+    });
     posibles += miembrosFecha.length;
 
     miembrosFecha.forEach((m) => {
@@ -837,7 +842,11 @@ function obtenerDatosFiltradosReporte() {
 function obtenerResumenAsistenciaPorIntegrante(miembrosFiltrados, fechasFiltradas) {
   return miembrosFiltrados
     .map((m) => {
-      const fechasIntegrante = fechasFiltradas.filter((f) => f.celulaId === m.celulaId);
+      const fechasIntegrante = fechasFiltradas.filter((f) => {
+        if (f.celulaId !== m.celulaId) return false;
+        if (!m.ingreso) return true; // Si no tiene fecha de ingreso, todas las fechas son válidas
+        return f.fecha >= m.ingreso; // Solo fechas posteriores o iguales al ingreso
+      });
       let asistio = 0;
       let falto = 0;
       let sinRegistro = 0;
@@ -1133,7 +1142,7 @@ function renderIntegrantes() {
   const celulaId = obtenerCelulaOperacionId();
   if (!celulaId) {
     integranteCelulaActual.textContent = "Solo lectura: el administrador solo visualiza el dashboard.";
-    bodyIntegrantes.innerHTML = "<tr><td colspan='7'>La gestión de integrantes está disponible solo para líderes.</td></tr>";
+    bodyIntegrantes.innerHTML = "<tr><td colspan='8'>La gestión de integrantes está disponible solo para líderes.</td></tr>";
     return;
   }
 
@@ -1142,7 +1151,7 @@ function renderIntegrantes() {
 
   bodyIntegrantes.innerHTML = "";
   if (lista.length === 0) {
-    bodyIntegrantes.innerHTML = "<tr><td colspan='7'>No hay integrantes registrados en esta célula.</td></tr>";
+    bodyIntegrantes.innerHTML = "<tr><td colspan='8'>No hay integrantes registrados en esta célula.</td></tr>";
     return;
   }
 
@@ -1156,6 +1165,7 @@ function renderIntegrantes() {
       <td>${integrante.nacimiento ? formatearFecha(integrante.nacimiento) : "—"}</td>
       <td>${edad === null ? "—" : edad}</td>
       <td>${integrante.celular || "—"}</td>
+      <td>${integrante.ingreso ? formatearFecha(integrante.ingreso) : "—"}</td>
       <td>
         <div class="integrante-acciones">
           <button class="btn btn-editar" data-id="${integrante.id}">Editar</button>
@@ -1272,19 +1282,27 @@ function cargarTablaAsistencia() {
   miembrosCelula.forEach((m, index) => {
     let html = `<td>${index + 1}</td><td>${m.nombre}</td><td>${m.tipo}</td>`;
     fechasFiltradas.forEach((f) => {
-      const estado = asistencias[keyAsistencia(celulaId, m.id, f.fecha)];
-      let clase = "";
-      let texto = "";
+      // Solo mostrar asistencia si la fecha es válida para este integrante
+      const fechaValida = !m.ingreso || f.fecha >= m.ingreso;
+      
+      if (fechaValida) {
+        const estado = asistencias[keyAsistencia(celulaId, m.id, f.fecha)];
+        let clase = "";
+        let texto = "";
 
-      if (estado === true) {
-        clase = "asistio";
-        texto = "✔";
-      } else if (estado === false) {
-        clase = "falto";
-        texto = "✘";
+        if (estado === true) {
+          clase = "asistio";
+          texto = "✔";
+        } else if (estado === false) {
+          clase = "falto";
+          texto = "✘";
+        }
+
+        html += `<td><button data-id="${m.id}" data-fecha="${f.fecha}" class="${clase}">${texto}</button></td>`;
+      } else {
+        // Fecha anterior al ingreso del integrante - mostrar celda vacía
+        html += `<td class="fecha-no-valida">—</td>`;
       }
-
-      html += `<td><button data-id="${m.id}" data-fecha="${f.fecha}" class="${clase}">${texto}</button></td>`;
     });
 
     const fila = document.createElement("tr");
@@ -1646,6 +1664,7 @@ function modoEditarIntegrante(id) {
   tipoIntegrante.value = integrante.tipo;
   nacimientoIntegrante.value = integrante.nacimiento || "";
   celularIntegrante.value = integrante.celular || "";
+  ingresoIntegrante.value = integrante.ingreso || "";
   btnGuardarIntegrante.textContent = "Guardar cambios";
   btnCancelarEdicion.classList.remove("oculto");
 }
@@ -1815,7 +1834,8 @@ formIntegrante.addEventListener("submit", (e) => {
         nombre,
         tipo: tipoIntegrante.value,
         nacimiento: nacimientoIntegrante.value,
-        celular: celularIntegrante.value.trim()
+        celular: celularIntegrante.value.trim(),
+        ingreso: ingresoIntegrante.value
       };
     }
     cancelarEdicionIntegrante();
@@ -1826,7 +1846,8 @@ formIntegrante.addEventListener("submit", (e) => {
       nombre,
       tipo: tipoIntegrante.value,
       nacimiento: nacimientoIntegrante.value,
-      celular: celularIntegrante.value.trim()
+      celular: celularIntegrante.value.trim(),
+      ingreso: ingresoIntegrante.value
     });
     formIntegrante.reset();
   }
@@ -1993,6 +2014,13 @@ bodyTabla.addEventListener("click", (e) => {
   const id = e.target.dataset.id;
   const fecha = e.target.dataset.fecha;
   if (!id || !fecha) return;
+
+  // Verificar que la fecha sea válida para este integrante
+  const integrante = miembros.find(m => String(m.id) === String(id));
+  if (integrante && integrante.ingreso && fecha < integrante.ingreso) {
+    alert("No se puede registrar asistencia en fechas anteriores al ingreso del integrante.");
+    return;
+  }
 
   const celulaId = obtenerCelulaActivaId();
   const key = keyAsistencia(celulaId, id, fecha);
