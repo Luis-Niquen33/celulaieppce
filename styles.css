@@ -349,6 +349,17 @@ h1 {
   color: var(--color-primary-strong);
 }
 
+#seccionIntegrantes .tabla-integrantes th:nth-child(7),
+#seccionIntegrantes .tabla-integrantes td:nth-child(7) {
+  min-width: 120px;
+  width: 120px;
+}
+
+#seccionIntegrantes .tabla-integrantes th:nth-child(8),
+#seccionIntegrantes .tabla-integrantes td:nth-child(8) {
+  min-width: 160px;
+}
+
 .tabla-integrantes th,
 .tabla-integrantes td {
   white-space: normal;
