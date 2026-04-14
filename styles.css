@@ -350,14 +350,15 @@ h1 {
 }
 
 #seccionIntegrantes .tabla-integrantes th:nth-child(7),
-#seccionIntegrantes .tabla-integrantes td:nth-child(7) {
+#seccionIntegrantes .tabla-integrantes td.col-ingreso {
   min-width: 120px;
   width: 120px;
 }
 
 #seccionIntegrantes .tabla-integrantes th:nth-child(8),
-#seccionIntegrantes .tabla-integrantes td:nth-child(8) {
-  min-width: 160px;
+#seccionIntegrantes .tabla-integrantes td.col-acciones {
+  min-width: 170px;
+  width: 170px;
 }
 
 .tabla-integrantes th,

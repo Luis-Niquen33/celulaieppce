@@ -1165,8 +1165,8 @@ function renderIntegrantes() {
       <td>${integrante.nacimiento ? formatearFecha(integrante.nacimiento) : "—"}</td>
       <td>${edad === null ? "—" : edad}</td>
       <td>${integrante.celular || "—"}</td>
-      <td>${integrante.ingreso ? formatearFecha(integrante.ingreso) : "—"}</td>
-      <td>
+      <td class="col-ingreso">${integrante.ingreso ? formatearFecha(integrante.ingreso) : "—"}</td>
+      <td class="col-acciones">
         <div class="integrante-acciones">
           <button class="btn btn-editar" data-id="${integrante.id}">Editar</button>
           <button class="btn btn-eliminar" data-id="${integrante.id}">Eliminar</button>
