@@ -357,8 +357,12 @@ h1 {
 
 #seccionIntegrantes .tabla-integrantes th:nth-child(8),
 #seccionIntegrantes .tabla-integrantes td.col-acciones {
-  min-width: 170px;
-  width: 170px;
+  min-width: 220px;
+  width: auto;
+}
+
+#seccionIntegrantes .tabla-integrantes td.col-acciones {
+  overflow: visible;
 }
 
 .tabla-integrantes th,
@@ -407,7 +411,7 @@ h1 {
 .tabla-integrantes .integrante-acciones {
   justify-content: center;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px;
   min-width: 180px;
 }
