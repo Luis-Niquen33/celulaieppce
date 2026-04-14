@@ -85,6 +85,7 @@ let fechas = _rawFechas.map((f) => {
   return {
     celulaId: celulas[0]?.id ?? null,
     leccion: "",
+    docente: "",
     ofrenda: 0,
     ...f
   };
@@ -177,6 +178,7 @@ const bodyMiembros = document.getElementById("bodyMiembros");
 const formFecha = document.getElementById("formFecha");
 const fechaAsistencia = document.getElementById("fechaAsistencia");
 const leccionFecha = document.getElementById("leccionFecha");
+const docenteFecha = document.getElementById("docenteFecha");
 const ofrendaFecha = document.getElementById("ofrendaFecha");
 const listaFechas = document.getElementById("listaFechas");
 const fechaCelulaActual = document.getElementById("fechaCelulaActual");
@@ -653,6 +655,7 @@ function renderDashboard() {
       <div class="dash-tarjeta-fecha">${formatearFecha(f.fecha)}</div>
       <div class="dash-tarjeta-fila"><span>📌 ${obtenerNombreCelula(f.celulaId)}</span></div>
       <div class="dash-tarjeta-leccion">${f.leccion ? `📖 ${f.leccion}` : "<em>Sin lección registrada</em>"}</div>
+      ${f.docente ? `<div class="dash-tarjeta-fila"><span>👤 Docente: <strong>${f.docente}</strong></span></div>` : ""}
       <div class="dash-tarjeta-fila">
         <span>✔ Asistentes: <strong>${asistio}</strong> / ${miembrosFecha.length}</span>
         <span>${pct}%</span>
@@ -1208,6 +1211,7 @@ function renderFechas() {
       <div class="fecha-info">
         <strong>${formatearFecha(f.fecha)}</strong>
         <input class="input-leccion" type="text" placeholder="Lección" value="${f.leccion || ""}" data-fecha="${f.fecha}">
+        <input class="input-docente" type="text" placeholder="Docente" value="${f.docente || ""}" data-fecha="${f.fecha}">
         <input class="input-ofrenda" type="number" min="0" step="0.01" placeholder="Ofrenda S/" value="${f.ofrenda || ""}" data-fecha="${f.fecha}">
       </div>
       <button class="btn btn-eliminar" data-fecha="${f.fecha}">Eliminar</button>
@@ -1955,6 +1959,7 @@ formFecha.addEventListener("submit", (e) => {
     celulaId,
     fecha,
     leccion: leccionFecha.value.trim(),
+    docente: docenteFecha.value.trim(),
     ofrenda: Number.parseFloat(ofrendaFecha.value) || 0
   });
 
@@ -2001,6 +2006,10 @@ listaFechas.addEventListener("change", (e) => {
 
   if (e.target.classList.contains("input-leccion")) {
     fechas[idx].leccion = e.target.value.trim();
+  }
+
+  if (e.target.classList.contains("input-docente")) {
+    fechas[idx].docente = e.target.value.trim();
   }
 
   if (e.target.classList.contains("input-ofrenda")) {
