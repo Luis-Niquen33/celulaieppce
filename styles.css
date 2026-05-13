@@ -228,6 +228,16 @@ h1 {
   margin: 6px 2px;
 }
 
+.anuncio-cumpleanos {
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 12px;
+  margin: 8px 2px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
 .contenido-inicio {
   flex: 1;
   padding: 28px;
@@ -873,6 +883,11 @@ h1 {
 }
 
 .input-leccion {
+  flex: 1;
+  min-width: 160px;
+}
+
+.input-docente {
   flex: 1;
   min-width: 160px;
 }

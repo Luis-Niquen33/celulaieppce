@@ -143,7 +143,7 @@ const btnNavMiembros = document.getElementById("btnNavMiembros");
 const btnNavFechas = document.getElementById("btnNavFechas");
 const btnNavAsistencia = document.getElementById("btnNavAsistencia");
 const btnNavAdmin = document.getElementById("btnNavAdmin");
-const btnLimpiarTodo = document.getElementById("btnLimpiarTodo");
+const anuncioCumpleanos = document.getElementById("anuncioCumpleanos");
 
 const filtroCelulaDashboard = document.getElementById("filtroCelulaDashboard");
 const filtroLiderDashboard = document.getElementById("filtroLiderDashboard");
@@ -321,6 +321,47 @@ function formatearMes(ym) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+function obtenerProximoCumpleanos() {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const miembrosConFecha = miembros
+    .filter((m) => m.nacimiento)
+    .map((m) => {
+      const [anio, mes, dia] = m.nacimiento.split("-").map(Number);
+      const cumple = new Date(hoy.getFullYear(), mes - 1, dia);
+      if (cumple < hoy) {
+        cumple.setFullYear(hoy.getFullYear() + 1);
+      }
+      return { miembro: m, cumple };
+    });
+
+  if (miembrosConFecha.length === 0) return null;
+  miembrosConFecha.sort((a, b) => a.cumple - b.cumple);
+  return miembrosConFecha[0];
+}
+
+function formatearFechaAnuncio(fecha) {
+  const opciones = { weekday: "long", day: "numeric", month: "long" };
+  const texto = fecha.toLocaleDateString("es-PE", opciones).replace(/,\s*/g, " ");
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function actualizarAnuncioCumpleanos() {
+  if (!anuncioCumpleanos) return;
+  if (!sesion) {
+    anuncioCumpleanos.textContent = "";
+    return;
+  }
+
+  const proximo = obtenerProximoCumpleanos();
+  if (!proximo) {
+    anuncioCumpleanos.textContent = "Registra integrantes para ver los próximos cumpleaños.";
+    return;
+  }
+
+  anuncioCumpleanos.textContent = `Se acerca el cumpleaños de ${proximo.miembro.nombre} el día ${formatearFechaAnuncio(proximo.cumple)}.`;
+}
+
 function calcularEdad(nacimiento) {
   if (!nacimiento) return null;
   const hoy = new Date();
@@ -379,7 +420,7 @@ function refrescarEstadoSesionUI() {
   btnNavIntegrantes.classList.toggle("oculto", !mostrarRegistro);
   btnNavFechas.classList.toggle("oculto", !mostrarRegistro);
   btnNavAsistencia.classList.toggle("oculto", !mostrarRegistro);
-  btnLimpiarTodo.classList.toggle("oculto", !mostrarRegistro);
+  actualizarAnuncioCumpleanos();
 }
 
 function actualizarFiltroCelulas() {
@@ -1182,6 +1223,8 @@ function renderIntegrantes() {
     `;
     bodyIntegrantes.appendChild(fila);
   });
+
+  actualizarAnuncioCumpleanos();
 }
 
 function renderFechas() {
@@ -1468,7 +1511,6 @@ function renderAdmin() {
 
   listaCelulas.innerHTML = "";
   ordenarCelulasLista(celulas).forEach((c) => {
-    const item = document.createElement("li");
     const totalLideres = users.filter((u) => u.celulaId === c.id && u.rol === "lider").length;
     const enEdicion = editandoCelulaId?.value === c.id;
     item.innerHTML = `
@@ -2048,24 +2090,6 @@ bodyTabla.addEventListener("click", (e) => {
   cargarTablaAsistencia();
 });
 
-btnLimpiarTodo.addEventListener("click", () => {
-  if (!puedeRegistrar()) return;
-
-  const celulaId = obtenerCelulaActivaId();
-  const ok = confirm(`Se borrarán datos de la célula: ${obtenerNombreCelula(celulaId)}. ¿Continuar?`);
-  if (!ok) return;
-
-  miembros = miembros.filter((m) => m.celulaId !== celulaId);
-  fechas = fechas.filter((f) => f.celulaId !== celulaId);
-
-  Object.keys(asistencias).forEach((k) => {
-    if (k.startsWith(`${celulaId}-`)) delete asistencias[k];
-  });
-
-  guardarDatos();
-  refrescarTodo();
-  mostrarInicio();
-});
 
 formCelula.addEventListener("submit", (e) => {
   e.preventDefault();
